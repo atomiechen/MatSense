@@ -2,3 +2,5 @@
 dist
 # Egg metadata
 *.egg-info
+# Python binary cache files
+__pycache__
