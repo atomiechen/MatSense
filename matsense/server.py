@@ -52,7 +52,7 @@ def enumerate_ports():
 
 def task_serial(paras):
 	try:
-		if paras['debug']:
+		if paras['config']['server_mode']['debug']:
 			my_setter = DataSetterDebug()
 		else:
 			my_setter = DataSetterSerial(
@@ -127,10 +127,10 @@ def task_server(paras):
 		paras['pipe_proc'].send((FLAG.FLAG_STOP,))
 
 def task_file(paras):
-	print(f"Processed data saved to: {paras['output']}")
+	print(f"Processed data saved to: {paras['config']['server_mode']['out_filename']}")
 	my_setter = DataSetterFile(
 		paras['config']['sensor']['total'], 
-		paras['filenames'], 
+		paras['config']['server_mode']['in_filenames'], 
 	)
 	my_proc = Proc(
 		paras['config']['sensor']['shape'], 
@@ -153,11 +153,11 @@ def task_file(paras):
 		cali_frames=paras['config']['process']['cali_frames'],
 		cali_win_size=paras['config']['process']['cali_win_size'],
 		pipe_conn=None,
-		output_filename=paras['output'],
+		output_filename=paras['config']['server_mode']['out_filename'],
 		copy_tags=True,
 	)
 	## clear file content
-	clear_file(paras['output'])
+	clear_file(paras['config']['server_mode']['out_filename'])
 	my_proc.run()
 
 def prepare_config(args):
@@ -197,6 +197,13 @@ def prepare_config(args):
 		config['server_mode']['visualize'] = args.visualize
 	if config['server_mode']['enumerate'] is None or hasattr(args, 'enumerate'+DEST_SUFFIX):
 		config['server_mode']['enumerate'] = args.enumerate
+	if config['server_mode']['debug'] is None or hasattr(args, 'debug'+DEST_SUFFIX):
+		config['server_mode']['debug'] = args.debug
+	if args.filenames:
+		config['server_mode']['use_file'] = True
+		config['server_mode']['in_filenames'] = args.filenames
+	if config['server_mode']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
+		config['server_mode']['out_filename'] = args.output
 	if config['serial']['imu'] is None or hasattr(args, 'imu'+DEST_SUFFIX):
 		config['serial']['imu'] = args.imu
 	if config['process']['intermediate'] is None or hasattr(args, 'intermediate'+DEST_SUFFIX):
@@ -226,7 +233,7 @@ def main():
 	parser.add_argument('-d', '--debug', dest='debug', action=make_action('store_true'), default=DEBUG, help="debug mode")
 
 	parser.add_argument('filenames', nargs='*', action='store')
-	parser.add_argument('-o', dest='output', action='store', default=OUTPUT_FILENAME, help="output processed data to file")
+	parser.add_argument('-o', dest='output', action=make_action('store'), default=OUTPUT_FILENAME, help="output processed data to file")
 
 	parser.add_argument('-i', '--imu', dest='imu', action=make_action('store_true'), default=False, help="support IMU")
 
@@ -261,12 +268,9 @@ def main():
 		"idx_out_file": idx_out_file,
 		"pipe_proc": pipe_proc,
 		"pipe_server": pipe_server,
-		"debug": args.debug,
-		"filenames": args.filenames,
-		"output": args.output,
 	}
 
-	if args.filenames:
+	if config['server_mode']['use_file']:
 		task_file(paras)
 		return
 
