@@ -195,10 +195,9 @@ setuptools.setup(
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
         'console_scripts': [
-            # 'sample=sample:main',
-            'matserver=matsense.server',
-            'matclient=matsense.client',
-            'matdatautil=matsense.datautil',
+            'matserver=matsense.server:main',
+            'matclient=matsense.client:main',
+            'matdata=matsense.data:main',
         ],
     },
 )
