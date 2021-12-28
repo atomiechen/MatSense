@@ -8,6 +8,8 @@ from typing import Iterable
 ## Convenient module to instantly write to files by closing the file after each writing operation
 ## Helpful when there are multiple writings and the program may be interrupted midway
 
+ENCODING = 'utf-8'
+
 ## check if the file root path exists, and create if not
 def check_root(filename):
 	root_dir, bare_filename = os.path.split(filename)
@@ -19,19 +21,19 @@ def check_root(filename):
 def write(filename, content, override=False):
 	check_root(filename)
 	mode = 'w' if override else 'a'
-	with open(filename, mode) as fout:
+	with open(filename, mode, encoding=ENCODING) as fout:
 		fout.write(content)
 
 ## write multiple lines to file
 def writelines(filename, lines, override=False):
 	check_root(filename)
 	mode = 'w' if override else 'a'
-	with open(filename, mode) as fout:
+	with open(filename, mode, encoding=ENCODING) as fout:
 		fout.writelines(lines)
 
 ## read all lines in file into a list
 def readlines(filename):
-	with open(filename, 'r') as fin:
+	with open(filename, 'r', encoding=ENCODING) as fin:
 		ret = fin.readlines()
 	return ret
 
@@ -98,5 +100,5 @@ def write_lines(filename, data, tags=None, delim=',', override=False):
 ## clear file content
 def clear_file(filename):
 	check_root(filename)
-	with open(filename, "w"):
+	with open(filename, "w", encoding=ENCODING):
 		pass
