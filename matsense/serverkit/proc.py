@@ -104,60 +104,6 @@ class Proc:
 				self.tags = [self.idx_out.value, timestamp]
 			write_line(self.filename, data_ptr, tags=self.tags)
 
-	def loop_proc(self):
-		print("Running processing...")
-		while True:
-			## check signals from the other process
-			if self.pipe_conn is not None:
-				if self.pipe_conn.poll():
-					msg = self.pipe_conn.recv()
-					# print(f"msg={msg}")
-					flag = msg[0]
-					if flag == FLAG.FLAG_STOP:
-						break
-					if flag in (FLAG.FLAG_REC_DATA, FLAG.FLAG_REC_RAW):
-						self.record_raw = True if flag == FLAG.FLAG_REC_RAW else True
-						filename = msg[1]
-						if filename == "":
-							if flag == FLAG.FLAG_REC_RAW:
-								filename = datetime.now().strftime(self.FILENAME_TEMPLATE_RAW)
-							else:
-								filename = datetime.now().strftime(self.FILENAME_TEMPLATE)
-						try:
-							with open(filename, 'a') as fout:
-								pass
-							if self.filename is not None:
-								print(f"stop recording:   {self.filename}")
-							self.filename = filename
-							print(f"recording to:     {self.filename}")
-							self.pipe_conn.send((FLAG.FLAG_REC_RET_SUCCESS,self.filename))
-						except:
-							print(f"failed to record: {self.filename}")
-							self.pipe_conn.send((FLAG.FLAG_REC_RET_FAIL,))
-
-					elif flag == FLAG.FLAG_REC_STOP:
-						if self.filename is not None:
-							print(f"stop recording:   {self.filename}")
-						self.filename = None
-						self.filename_id = 0
-					elif flag == FLAG.FLAG_REC_BREAK:
-						self.filename_id += 1
-
-			try:
-				self.get_raw_frame()
-			except SerialTimeout:
-				continue
-			except FileEnd:
-				print(f"Processing time: {time.time()-self.start_time:.3f} s")
-				break
-			self.cur_time = time.time()
-			self.data_raw[:] = self.data_tmp
-			if not self.my_raw:
-				self.filter()
-				self.calibrate()
-			self.data_out[:] = self.data_tmp
-			self.post_action()
-
 	def warm_up(self):
 		print("Warming up processing...")
 		begin = time.time()
@@ -166,20 +112,6 @@ class Proc:
 				self.get_raw_frame()
 			except SerialTimeout:
 				pass
-
-	def run_org(self):
-		if self.WARM_UP > 0:
-			self.warm_up()
-
-		self.start_time = time.time()
-		self.reset()
-		self.print_proc()
-
-		if not self.my_raw:
-			self.prepare_spatial()
-			self.prepare_temporal()
-			self.prepare_cali()
-		self.loop_proc()
 
 	def run(self):
 		if self.WARM_UP > 0:
