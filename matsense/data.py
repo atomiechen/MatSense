@@ -52,7 +52,7 @@ def main():
 		with open(args.output, 'w') as fout:
 			pass
 		cnt = 0
-		with open(filename, 'r') as fin:
+		with open(filename, 'r', encoding='utf-8') as fin:
 			for line in fin:
 				data_parse, frame_idx, date_time = parse_line(line, args.n[0]*args.n[1], ',')
 				data_out = my_processor.transform(data_parse, reshape=True)
@@ -64,7 +64,7 @@ def main():
 	else:
 		print("Data visualization mode")
 		content = ([], [])
-		with open(filename, 'r') as fin:
+		with open(filename, 'r', encoding='utf-8') as fin:
 			for line in fin:
 				data_parse, frame_idx, date_time = parse_line(line, args.n[0]*args.n[1], ',')
 				if args.convert:

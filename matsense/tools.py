@@ -83,7 +83,7 @@ def check_config(config):
 
 
 def load_config(filename):
-	with open(filename) as fin:
+	with open(filename, 'r', encoding='utf-8') as fin:
 		config = yaml.safe_load(fin)
 	check_config(config)
 	return config

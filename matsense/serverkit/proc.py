@@ -221,7 +221,7 @@ class Proc:
 							else:
 								filename = datetime.now().strftime(self.FILENAME_TEMPLATE)
 						try:
-							with open(filename, 'a') as fout:
+							with open(filename, 'a', encoding='utf-8') as fout:
 								pass
 							if self.filename is not None:
 								print(f"stop recording:   {self.filename}")
