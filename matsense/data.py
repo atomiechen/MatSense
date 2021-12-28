@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 
-from matsense.filemanager import parse_line, write_line
+from matsense.filemanager import parse_line, write_line, clear_file
 from matsense.serverkit import Proc
 from matsense.process import Processor
 from matsense.tools import check_shape
@@ -49,8 +49,7 @@ def main():
 
 		print(f"writing to file: {args.output}")
 		## clear file content
-		with open(args.output, 'w') as fout:
-			pass
+		clear_file(args.output)
 		cnt = 0
 		with open(filename, 'r', encoding='utf-8') as fin:
 			for line in fin:
