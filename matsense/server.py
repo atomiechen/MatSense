@@ -255,7 +255,6 @@ def main():
 	data_raw = Array('d', config['sensor']['total'])  # d for double
 	data_imu = Array('d', 6)  # d for double
 	idx_out = Value('i')  # i for int
-	idx_out_file = Value('i')
 
 	pipe_proc, pipe_server = Pipe(duplex=True)
 
@@ -265,7 +264,6 @@ def main():
 		"data_raw": data_raw,
 		"data_imu": data_imu,
 		"idx_out": idx_out,
-		"idx_out_file": idx_out_file,
 		"pipe_proc": pipe_proc,
 		"pipe_server": pipe_server,
 	}
