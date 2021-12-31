@@ -109,48 +109,6 @@ class Userver:
 	def __exit__(self, type, value, traceback):
 		self.exit()
 
-	def proc_cmd(self):
-		if self.data[0] == CMD.CLOSE:
-			reply = pack("=B", 0)
-			self.my_socket.sendto(reply, self.client_addr)
-			self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
-			return CMD.CLOSE
-		elif self.data[0] == CMD.DATA:
-			reply = pack(self.frame_format, *(self.data_out), self.idx_out.value)
-			self.my_socket.sendto(reply, self.client_addr)
-		elif self.data[0] == CMD.RAW:
-			reply = pack(self.frame_format, *(self.data_raw), self.idx_out.value)
-			self.my_socket.sendto(reply, self.client_addr)
-		elif self.data[0] in (CMD.REC_DATA, CMD.REC_RAW):
-			if self.data[0] == CMD.REC_DATA:  ## processed data
-				self.pipe_conn.send((FLAG.FLAG_REC_DATA, str(self.data[1:], encoding = "utf-8")))
-			else:  ## raw data
-				self.pipe_conn.send((FLAG.FLAG_REC_RAW, str(self.data[1:], encoding = "utf-8")))
-			msg = self.pipe_conn.recv()
-			flag = msg[0]
-			if flag == FLAG.FLAG_REC_RET_SUCCESS:
-				reply = pack("=B", 0) + msg[1].encode('utf-8')
-			else:
-				reply = pack("=B", 255)
-			self.my_socket.sendto(reply, self.client_addr)
-		elif self.data[0] == CMD.REC_STOP:
-			reply = pack("=B", 0)
-			self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
-			self.my_socket.sendto(reply, self.client_addr)
-		elif self.data[0] == CMD.RESTART:
-			## TODO
-			pass
-		elif self.data[0] == CMD.PARAS:
-			## TODO
-			pass
-		elif self.data[0] == CMD.REC_BREAK:
-			reply = pack("=B", 0)
-			self.my_socket.sendto(reply, self.client_addr)
-			self.pipe_conn.send((FLAG.FLAG_REC_BREAK,))
-		elif self.data[0] == CMD.DATA_IMU:
-			reply = pack("=6di", *(self.data_imu), self.idx_out.value)
-			self.my_socket.sendto(reply, self.client_addr)
-
 	def print_service(self):
 		if self.UDP:
 			protocol_str = 'UDP'
@@ -173,10 +131,49 @@ class Userver:
 			## try to receive requests from client(s)
 			try:
 				self.data, self.client_addr = self.my_socket.recvfrom(self.BUF_SIZE)
-				ret = self.proc_cmd()
-				if ret == CMD.CLOSE:
+
+				if self.data[0] == CMD.CLOSE:
+					reply = pack("=B", 0)
+					self.my_socket.sendto(reply, self.client_addr)
+					self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
 					self.pipe_conn.send((FLAG.FLAG_STOP,))
 					break
+				elif self.data[0] == CMD.DATA:
+					reply = pack(self.frame_format, *(self.data_out), self.idx_out.value)
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] == CMD.RAW:
+					reply = pack(self.frame_format, *(self.data_raw), self.idx_out.value)
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] in (CMD.REC_DATA, CMD.REC_RAW):
+					if self.data[0] == CMD.REC_DATA:  ## processed data
+						self.pipe_conn.send((FLAG.FLAG_REC_DATA, str(self.data[1:], encoding = "utf-8")))
+					else:  ## raw data
+						self.pipe_conn.send((FLAG.FLAG_REC_RAW, str(self.data[1:], encoding = "utf-8")))
+					msg = self.pipe_conn.recv()
+					flag = msg[0]
+					if flag == FLAG.FLAG_REC_RET_SUCCESS:
+						reply = pack("=B", 0) + msg[1].encode('utf-8')
+					else:
+						reply = pack("=B", 255)
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] == CMD.REC_STOP:
+					reply = pack("=B", 0)
+					self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] == CMD.RESTART:
+					## TODO
+					pass
+				elif self.data[0] == CMD.PARAS:
+					## TODO
+					pass
+				elif self.data[0] == CMD.REC_BREAK:
+					reply = pack("=B", 0)
+					self.my_socket.sendto(reply, self.client_addr)
+					self.pipe_conn.send((FLAG.FLAG_REC_BREAK,))
+				elif self.data[0] == CMD.DATA_IMU:
+					reply = pack("=6di", *(self.data_imu), self.idx_out.value)
+					self.my_socket.sendto(reply, self.client_addr)
+
 			except timeout:
 				pass
 			except (FileNotFoundError, ConnectionResetError):
