@@ -114,6 +114,8 @@ class Proc:
 				pass
 
 	def run(self):
+		ret = None
+
 		if self.WARM_UP > 0:
 			self.warm_up()
 
@@ -143,6 +145,11 @@ class Proc:
 					# print(f"msg={msg}")
 					flag = msg[0]
 					if flag == FLAG.FLAG_STOP:
+						break
+					if flag == FLAG.FLAG_RESTART:
+						config_new = msg[1]
+						## restart with new config
+						ret = (1, config_new)
 						break
 					if flag in (FLAG.FLAG_REC_DATA, FLAG.FLAG_REC_RAW):
 						self.record_raw = True if flag == FLAG.FLAG_REC_RAW else True
@@ -190,3 +197,5 @@ class Proc:
 
 		self.handler_pressure.final()
 		self.handler_imu.final()
+
+		return ret

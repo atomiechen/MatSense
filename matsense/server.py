@@ -89,7 +89,7 @@ def task_serial(paras):
 			imu=paras['config']['serial']['imu'],
 			intermediate=paras['config']['process']['intermediate']
 		)
-		my_proc.run()
+		ret = my_proc.run()
 	except KeyboardInterrupt:
 		pass
 	except CustomException as e:
@@ -101,6 +101,7 @@ def task_serial(paras):
 		## close the other process
 		paras['pipe_server'].send((FLAG.FLAG_STOP,))
 	print("Processing stopped.")
+	return ret
 
 def task_server(paras):
 	try:
@@ -211,37 +212,8 @@ def prepare_config(args):
 	check_config(config)
 	return config
 
-
-def main():
-	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-	parser.add_argument('-e', dest='enumerate', action=make_action('store_true'), default=False, help="enumerate all serial ports")
-	parser.add_argument('-p', dest='port', action=make_action('store'), default=PORT, help="specify serial port")
-	parser.add_argument('-b', dest='baudrate', action=make_action('store'), default=BAUDRATE, type=int, help="specify baudrate")
-	parser.add_argument('-t', dest='timeout', action=make_action('store'), default=TIMEOUT, type=float, help="specify timeout in seconds")
-	parser.add_argument('-n', dest='n', action=make_action('store'), default=[N], type=int, nargs='+', help="specify sensor shape")
-	parser.add_argument('-s', '--service', dest='service', action=make_action('store_true'), default=False, help="run service")
-	parser.add_argument('-a', '--address', dest='address', action=make_action('store'), help="specify server socket address")
-	parser.add_argument('-u', '--udp', dest='udp', action=make_action('store_true'), default=UDP, help="use UDP protocol")
-	parser.add_argument('-r', '--raw', dest='raw', action=make_action('store_true'), default=False, help="raw data mode")
-	parser.add_argument('-nc', '--no_convert', dest='no_convert', action=make_action('store_true'), default=NO_CONVERT, help="do not apply voltage-resistance conversion")
-	parser.add_argument('-v', '--visualize', dest='visualize', action=make_action('store_true'), default=False, help="enable visualization")
-	parser.add_argument('-z', '--zlim', dest='zlim', action=make_action('store'), default=ZLIM, type=float, help="z-axis limit")
-	parser.add_argument('-f', dest='fps', action=make_action('store'), default=FPS, type=int, help="frames per second")
-	parser.add_argument('--pyqtgraph', dest='pyqtgraph', action=make_action('store_true'), default=False, help="use pyqtgraph to plot")
-	# parser.add_argument('-m', '--matplot', dest='matplot', action=make_action('store_true'), default=False, help="use matplotlib to plot")
-	parser.add_argument('--config', dest='config', action=make_action('store'), default=None, help="specify configuration file")
-	parser.add_argument('-d', '--debug', dest='debug', action=make_action('store_true'), default=DEBUG, help="debug mode")
-
-	parser.add_argument('filenames', nargs='*', action='store')
-	parser.add_argument('-o', dest='output', action=make_action('store'), default=OUTPUT_FILENAME, help="output processed data to file")
-
-	parser.add_argument('-i', '--imu', dest='imu', action=make_action('store_true'), default=False, help="support IMU")
-
-	parser.add_argument('--scatter', dest='scatter', action=make_action('store_true'), default=False, help="show scatter plot")
-	parser.add_argument('--intermediate', dest='intermediate', action=make_action('store'), default=INTERMEDIATE, type=int, help="specify intermediate result")
-
-	args = parser.parse_args()
-	config = prepare_config(args)
+def run(config):
+	ret = None
 
 	## enumerate serial ports
 	if config['server_mode']['enumerate']:
@@ -305,10 +277,62 @@ def main():
 			p_server = Process(target=task_server, args=(paras,))
 			p_server.start()
 
-		task_serial(paras)
+		ret = task_serial(paras)
 
 		if config['server_mode']['service']:
 			p_server.join()
+	
+	del data_out
+	del data_raw
+	del data_imu
+	del idx_out
+	del pipe_proc, pipe_server
+
+	return ret
+
+
+def main():
+	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+	parser.add_argument('-e', dest='enumerate', action=make_action('store_true'), default=False, help="enumerate all serial ports")
+	parser.add_argument('-p', dest='port', action=make_action('store'), default=PORT, help="specify serial port")
+	parser.add_argument('-b', dest='baudrate', action=make_action('store'), default=BAUDRATE, type=int, help="specify baudrate")
+	parser.add_argument('-t', dest='timeout', action=make_action('store'), default=TIMEOUT, type=float, help="specify timeout in seconds")
+	parser.add_argument('-n', dest='n', action=make_action('store'), default=[N], type=int, nargs='+', help="specify sensor shape")
+	parser.add_argument('-s', '--service', dest='service', action=make_action('store_true'), default=False, help="run service")
+	parser.add_argument('-a', '--address', dest='address', action=make_action('store'), help="specify server socket address")
+	parser.add_argument('-u', '--udp', dest='udp', action=make_action('store_true'), default=UDP, help="use UDP protocol")
+	parser.add_argument('-r', '--raw', dest='raw', action=make_action('store_true'), default=False, help="raw data mode")
+	parser.add_argument('-nc', '--no_convert', dest='no_convert', action=make_action('store_true'), default=NO_CONVERT, help="do not apply voltage-resistance conversion")
+	parser.add_argument('-v', '--visualize', dest='visualize', action=make_action('store_true'), default=False, help="enable visualization")
+	parser.add_argument('-z', '--zlim', dest='zlim', action=make_action('store'), default=ZLIM, type=float, help="z-axis limit")
+	parser.add_argument('-f', dest='fps', action=make_action('store'), default=FPS, type=int, help="frames per second")
+	parser.add_argument('--pyqtgraph', dest='pyqtgraph', action=make_action('store_true'), default=False, help="use pyqtgraph to plot")
+	# parser.add_argument('-m', '--matplot', dest='matplot', action=make_action('store_true'), default=False, help="use matplotlib to plot")
+	parser.add_argument('--config', dest='config', action=make_action('store'), default=None, help="specify configuration file")
+	parser.add_argument('-d', '--debug', dest='debug', action=make_action('store_true'), default=DEBUG, help="debug mode")
+
+	parser.add_argument('filenames', nargs='*', action='store', help="use file(s) as data source instead of serial port")
+	parser.add_argument('-o', dest='output', action=make_action('store'), default=OUTPUT_FILENAME, help="output processed data to file")
+
+	parser.add_argument('-i', '--imu', dest='imu', action=make_action('store_true'), default=False, help="support IMU")
+
+	parser.add_argument('--scatter', dest='scatter', action=make_action('store_true'), default=False, help="show scatter plot")
+	parser.add_argument('--intermediate', dest='intermediate', action=make_action('store'), default=INTERMEDIATE, type=int, help="specify intermediate result")
+
+	args = parser.parse_args()
+	config = prepare_config(args)
+
+	while True:
+		## run according to config
+		ret = run(config)
+
+		if ret != None:
+			if ret[0] == 1:  ## restart
+				config = ret[1]
+				continue
+
+		## exit program
+		break
 
 
 if __name__ == '__main__':
