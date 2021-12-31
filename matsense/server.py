@@ -251,13 +251,18 @@ def main():
 	print_sensor(config)
 
 	## shared variables
+	## output data array
 	data_out = Array('d', config['sensor']['total'])  # d for double
+	## raw data array
 	data_raw = Array('d', config['sensor']['total'])  # d for double
+	## imu data array
 	data_imu = Array('d', 6)  # d for double
-	idx_out = Value('i')  # i for int
-
+	## frame index
+	idx_out = Value('i')  # i for signed int
+	## Proc-Userver communication pipe
 	pipe_proc, pipe_server = Pipe(duplex=True)
 
+	## function parameters
 	paras = {
 		"config": config,
 		"data_out": data_out,
