@@ -55,7 +55,8 @@ class Userver:
 
 		self.init_socket()
 
-	def config(self, *, total=None, udp=None, timeout=None, pipe_conn=None):
+	def config(self, *, total=None, udp=None, timeout=None, 
+		pipe_conn=None, config_copy=None):
 		if total is not None:
 			self.TOTAL = total
 		if udp is not None:
@@ -64,6 +65,8 @@ class Userver:
 			self.TIMEOUT = timeout
 		if pipe_conn is not None:
 			self.pipe_conn = pipe_conn
+		if config_copy is not None:
+			self.config_copy = config_copy
 
 	def init_socket(self):
 		if not support_unix_socket:

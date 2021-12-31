@@ -114,6 +114,7 @@ def task_server(paras):
 			total=paras['config']['sensor']['total'],
 			udp=paras['config']['connection']['udp'],
 			pipe_conn=paras['pipe_server'],
+			config_copy=paras['config'],
 		) as my_server:
 			my_server.run_service()
 	except KeyboardInterrupt:
