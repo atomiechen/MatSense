@@ -48,17 +48,23 @@ def parse_mask(string_in):
 	return mask
 
 
-## recursion
-def check_config(config):
-	def recurse(dict_default, dict_target):
-		for key in dict_default:
-			if key in dict_target:
-				if isinstance(dict_default[key], dict):
-					recurse(dict_default[key], dict_target[key])
-			else:
+## recursion, fill dict_target according to dict_default
+def __recurse(dict_default, dict_target):
+	for key in dict_default:
+		if key in dict_target:
+			if dict_target[key] == None:
 				dict_target[key] = copy.deepcopy(dict_default[key])
+			elif isinstance(dict_default[key], dict):
+				__recurse(dict_default[key], dict_target[key])
+		else:
+			dict_target[key] = copy.deepcopy(dict_default[key])
+
+
+def check_config(config):
+	if not isinstance(config, dict):
+		config = {}
 	## recurse to fill empty fields
-	recurse(BLANK, config)
+	__recurse(BLANK, config)
 	## some transformation for certain fields
 	if config['sensor']['shape'] is not None:
 		config['sensor']['shape'] = check_shape(config['sensor']['shape'])
@@ -82,6 +88,12 @@ def check_config(config):
 		config['process']['interp'] = copy.deepcopy(config['sensor']['shape'])
 
 
+def parse_config(content):
+	config = yaml.safe_load(content)
+	check_config(config)
+	return config
+
+
 def load_config(filename):
 	with open(filename, 'r', encoding='utf-8') as fin:
 		config = yaml.safe_load(fin)
@@ -89,8 +101,19 @@ def load_config(filename):
 	return config
 
 
+def dump_config(config):
+	return yaml.safe_dump(config, encoding='utf-8')
+
+
 def blank_config():
 	return copy.deepcopy(BLANK)
+
+
+def combine_config(configA, configB):
+	config = copy.deepcopy(configA)
+	__recurse(configB, config)
+	check_config(config)
+	return config
 
 
 def print_sensor(config, tab=''):
