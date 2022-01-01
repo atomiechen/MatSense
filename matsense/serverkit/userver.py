@@ -166,18 +166,22 @@ class Userver:
 					self.my_socket.sendto(reply, self.client_addr)
 				elif self.data[0] == CMD.RESTART:
 					## TODO check new config and combine it with current config
+					success = False
 					try:
 						config_new = parse_config(str(self.data[1:], encoding='utf-8'))
 						config_new = combine_config(self.config_copy, config_new)
 						reply = pack("=B", 0) + dump_config(config_new).encode('utf-8')
+						success = True
 					except:
 						reply = pack("=B", 255) + dump_config(self.config_copy).encode('utf-8')
+						success = False
 
 					self.my_socket.sendto(reply, self.client_addr)
 
-					self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
-					self.pipe_conn.send((FLAG.FLAG_RESTART,config_new))
-					break
+					if success:
+						self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
+						self.pipe_conn.send((FLAG.FLAG_RESTART,config_new))
+						break
 				elif self.data[0] == CMD.PARAS:
 					## TODO
 					reply = pack("=B", 0) + dump_config(self.config_copy).encode('utf-8')
