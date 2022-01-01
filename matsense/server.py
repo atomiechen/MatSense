@@ -51,6 +51,7 @@ def enumerate_ports():
 		print(item)
 
 def task_serial(paras):
+	ret = None
 	try:
 		if paras['config']['server_mode']['debug']:
 			my_setter = DataSetterDebug()
