@@ -4,7 +4,8 @@ Communicate with server via UNIX domain datagram socket.
 """
 
 from socket import (
-	socket, AF_INET, SOCK_DGRAM, gethostname, gethostbyname
+	socket, AF_INET, SOCK_DGRAM, gethostname, gethostbyname,
+	SOL_SOCKET, SO_SNDBUF
 )
 try:
 	from socket import AF_UNIX
@@ -63,7 +64,7 @@ class Uclient:
 
 	N = 16
 	TIMEOUT = 0.1
-	BUF_SIZE = 4096
+	BUF_SIZE = 8192
 
 	def __init__(self, 
 				client_addr=None, 
@@ -161,6 +162,7 @@ class Uclient:
 					break
 		self.binded = True
 		self.my_socket.settimeout(self.TIMEOUT)
+		self.my_socket.setsockopt(SOL_SOCKET, SO_SNDBUF, self.BUF_SIZE)
 
 		if not self.server_addr:
 			if self.UDP:

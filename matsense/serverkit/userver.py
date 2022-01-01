@@ -36,7 +36,7 @@ class Userver:
 
 	TOTAL = 16 * 16
 	TIMEOUT = 0.1
-	BUF_SIZE = 2048
+	BUF_SIZE = 8192
 	REC_ID = 0
 
 	def __init__(self, data_out, data_raw, data_imu, idx_out, server_addr=None, **kwargs):
@@ -81,7 +81,7 @@ class Userver:
 			self.my_socket = socket(AF_UNIX, SOCK_DGRAM)
 
 		self.my_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-		self.my_socket.setsockopt(SOL_SOCKET, SO_SNDBUF, self.frame_size*2)
+		self.my_socket.setsockopt(SOL_SOCKET, SO_SNDBUF, max(self.frame_size*2, self.BUF_SIZE))
 		self.my_socket.settimeout(self.TIMEOUT)
 
 		if not self.server_addr:
