@@ -181,7 +181,7 @@ class Userver:
 						self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
 						self.pipe_conn.send((FLAG.FLAG_RESTART,config_new))
 						break
-				elif self.data[0] == CMD.PARAS:
+				elif self.data[0] == CMD.CONFIG:
 					reply = pack("=B", 0) + dump_config(self.config_copy).encode('utf-8')
 					self.my_socket.sendto(reply, self.client_addr)
 				elif self.data[0] == CMD.REC_BREAK:

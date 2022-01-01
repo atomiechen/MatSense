@@ -70,16 +70,16 @@ def interactive_cmd(my_client, my_cmd):
 				config_str = f.read()
 			print(len(config_str))
 			my_client.send_cmd(my_cmd, config_str)
-			ret, config = my_client.recv_paras()
+			ret, config = my_client.recv_config()
 			print("Received config:")
 			print_config(config)
 			if ret == 0:
 				print("server restarting...")
 			else:
 				print("server failted to restart")
-		elif my_cmd == CMD.PARAS:
+		elif my_cmd == CMD.CONFIG:
 			my_client.send_cmd(my_cmd)
-			ret, config = my_client.recv_paras()
+			ret, config = my_client.recv_config()
 			print("Received config:")
 			print_config(config)
 		elif my_cmd == CMD.REC_BREAK:

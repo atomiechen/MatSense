@@ -252,7 +252,7 @@ class Uclient:
 			label = ""
 		return self.data[0], label
 
-	def recv_paras(self):
+	def recv_config(self):
 		ret, config_str = self.recv_string()
 		config = parse_config(config_str)
 		return ret, config
