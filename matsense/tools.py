@@ -102,7 +102,7 @@ def load_config(filename):
 
 
 def dump_config(config):
-	return yaml.safe_dump(config, encoding='utf-8')
+	return yaml.safe_dump(config)
 
 
 def blank_config():
