@@ -28,6 +28,11 @@ def parse_ip_port(content):
 	return (ip, port)
 
 
+def dump_ip_port(ip_port):
+	ip, port = ip_port
+	return str(ip)+":"+str(port)
+
+
 def check_shape(n):
 	try:
 		n[1]
@@ -47,6 +52,12 @@ def parse_mask(string_in):
 	mask = np.array(mask, dtype=int)
 	return mask
 
+def dump_mask(mask_array):
+	lines = []
+	for row in mask_array:
+		str_list = [str(item) for item in row]
+		lines.append(" ".join(str_list))
+	return "\n".join(lines)
 
 ## recursion, fill dict_target according to dict_default
 def __recurse(dict_default, dict_target):
@@ -102,7 +113,17 @@ def load_config(filename):
 
 
 def dump_config(config):
-	return yaml.safe_dump(config)
+	config_copy = copy.deepcopy(config)
+
+	## some transformation for certain fields
+	if config_copy['sensor']['mask'] is not None:
+		config_copy['sensor']['mask'] = dump_mask(config_copy['sensor']['mask'])
+	if config_copy['connection']['server_address'] is not None:
+		config_copy['connection']['server_address'] = dump_ip_port(config_copy['connection']['server_address'])
+	if config_copy['connection']['client_address'] is not None:
+		config_copy['connection']['client_address'] = dump_ip_port(config_copy['connection']['client_address'])
+
+	return yaml.safe_dump(config_copy)
 
 
 def blank_config():
