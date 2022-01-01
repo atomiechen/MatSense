@@ -52,7 +52,7 @@ def parse_mask(string_in):
 def __recurse(dict_default, dict_target):
 	for key in dict_default:
 		if key in dict_target:
-			if dict_target[key] == None:
+			if dict_target[key] is None:
 				dict_target[key] = copy.deepcopy(dict_default[key])
 			elif isinstance(dict_default[key], dict):
 				__recurse(dict_default[key], dict_target[key])
