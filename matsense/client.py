@@ -66,9 +66,11 @@ def interactive_cmd(my_client, my_cmd):
 			print("RESTART server")
 			print("client-side config filename:")
 			config_filename = input("|> ").strip()
-			with open(config_filename, 'r', encoding='utf-8') as f:
-				config_str = f.read()
-			print(len(config_str))
+			if config_filename != "":
+				with open(config_filename, 'r', encoding='utf-8') as f:
+					config_str = f.read()
+			else:
+				config_str = ""
 			my_client.send_cmd(my_cmd, config_str)
 			ret, config = my_client.recv_config()
 			print("Received config:")

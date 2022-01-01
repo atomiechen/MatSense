@@ -167,8 +167,12 @@ class Userver:
 				elif self.data[0] == CMD.RESTART:
 					success = False
 					try:
-						config_new = parse_config(str(self.data[1:], encoding='utf-8'))
-						config_new = combine_config(self.config_copy, config_new)
+						content = str(self.data[1:], encoding='utf-8')
+						if content != "":
+							config_new = parse_config(content)
+							config_new = combine_config(self.config_copy, config_new)
+						else:
+							config_new = self.config_copy
 						reply = pack("=B", 0) + dump_config(config_new).encode('utf-8')
 						success = True
 					except:
