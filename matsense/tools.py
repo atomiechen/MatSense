@@ -72,8 +72,6 @@ def __recurse(dict_default, dict_target):
 
 
 def check_config(config):
-	if not isinstance(config, dict):
-		config = {}
 	## recurse to fill empty fields
 	__recurse(BLANK, config)
 	## some transformation for certain fields
