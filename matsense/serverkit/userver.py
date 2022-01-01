@@ -13,7 +13,7 @@ from os import unlink
 
 from .flag import FLAG
 from ..cmd import CMD
-from ..tools import dump_config, parse_config, combine_config
+from ..tools import dump_config, load_config, parse_config, combine_config
 
 
 class Userver:
@@ -166,6 +166,7 @@ class Userver:
 					self.my_socket.sendto(reply, self.client_addr)
 				elif self.data[0] == CMD.RESTART:
 					success = False
+					config_new = self.config_copy
 					try:
 						content = str(self.data[1:], encoding='utf-8')
 						if content != "":
@@ -175,6 +176,29 @@ class Userver:
 							config_new = self.config_copy
 						reply = pack("=B", 0) + dump_config(config_new).encode('utf-8')
 						success = True
+					except:
+						reply = pack("=B", 255) + dump_config(self.config_copy).encode('utf-8')
+						success = False
+
+					self.my_socket.sendto(reply, self.client_addr)
+
+					if success:
+						self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
+						self.pipe_conn.send((FLAG.FLAG_RESTART,config_new))
+						break
+				elif self.data[0] == CMD.RESTART_FILE:
+					success = False
+					config_new = self.config_copy
+					try:
+						filename = str(self.data[1:], encoding='utf-8')
+						if filename != "":
+							config_new = load_config(filename)
+							config_new = combine_config(self.config_copy, config_new)
+							reply = pack("=B", 0) + dump_config(config_new).encode('utf-8')
+							success = True
+						else:
+							reply = pack("=B", 255) + dump_config(self.config_copy).encode('utf-8')
+							success = False
 					except:
 						reply = pack("=B", 255) + dump_config(self.config_copy).encode('utf-8')
 						success = False

@@ -11,10 +11,11 @@ class CMD(IntEnum):
 		REC_DATA (int): record processed data to file
 		REC_RAW (int): record raw data to file
 		REC_STOP (int): stop recording
-		RESTART (int): restart the server with processing parameters
+		RESTART (int): restart the server with configuration string
 		CONFIG (int): get current configuration of the server
 		REC_BREAK (int): stop current recording and start a new one
 		DATA_IMU (int): get IMU data frame and frame index
+		RESTART (int): restart the server with configuration filename
 	"""
 	
 	CLOSE = 0
@@ -27,3 +28,4 @@ class CMD(IntEnum):
 	CONFIG = 7
 	REC_BREAK = 8
 	DATA_IMU = 9
+	RESTART_FILE = 10

@@ -79,6 +79,21 @@ def interactive_cmd(my_client, my_cmd):
 				print("server restarting...")
 			else:
 				print("server failted to restart")
+		elif my_cmd == CMD.RESTART_FILE:
+			print("RESTART server")
+			print("server-side config filename:")
+			config_filename = input("|> ").strip()
+			if config_filename == "":
+				print("must input filename!!!")
+			else:
+				my_client.send_cmd(my_cmd, config_filename)
+				ret, config = my_client.recv_config()
+				print("Received config:")
+				print_config(config)
+				if ret == 0:
+					print("server restarting...")
+				else:
+					print("server failted to restart")
 		elif my_cmd == CMD.CONFIG:
 			my_client.send_cmd(my_cmd)
 			ret, config = my_client.recv_config()
