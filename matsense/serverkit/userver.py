@@ -212,10 +212,6 @@ class Userver:
 				elif self.data[0] == CMD.CONFIG:
 					reply = pack("=B", 0) + dump_config(self.config_copy).encode('utf-8')
 					self.my_socket.sendto(reply, self.client_addr)
-				elif self.data[0] == CMD.REC_BREAK:
-					reply = pack("=B", 0)
-					self.my_socket.sendto(reply, self.client_addr)
-					self.pipe_conn.send((FLAG.FLAG_REC_BREAK,))
 				elif self.data[0] == CMD.DATA_IMU:
 					reply = pack("=6di", *(self.data_imu), self.idx_out.value)
 					self.my_socket.sendto(reply, self.client_addr)

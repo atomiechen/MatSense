@@ -33,7 +33,6 @@ class Proc:
 		## recording
 		self.record_raw = False
 		self.filename = None
-		self.filename_id = 0
 		self.tags = None
 		## copy tags from data setter to output file,
 		## if False, generate tags using current frame index and timestamp
@@ -175,9 +174,6 @@ class Proc:
 						if self.filename is not None:
 							print(f"stop recording:   {self.filename}")
 						self.filename = None
-						self.filename_id = 0
-					elif flag == FLAG.FLAG_REC_BREAK:
-						self.filename_id += 1
 
 			try:
 				self.get_raw_frame()
