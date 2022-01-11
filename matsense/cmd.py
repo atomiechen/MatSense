@@ -14,7 +14,7 @@ class CMD(IntEnum):
 		RESTART (int): restart the server with configuration string
 		CONFIG (int): get current configuration of the server
 		DATA_IMU (int): get IMU data frame and frame index
-		RESTART (int): restart the server with configuration filename
+		RESTART_FILE (int): restart the server with configuration filename
 	"""
 	
 	CLOSE = 0
