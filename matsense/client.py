@@ -19,74 +19,87 @@ FPS = 194
 TH = 0.15
 UDP = False
 
+interactive_commands = {
+	"close": CMD.CLOSE,
+	"data": CMD.DATA,
+	"raw": CMD.RAW,
+	"rec_data": CMD.REC_DATA,
+	"rec_raw": CMD.REC_RAW,
+	"rec_stop": CMD.REC_STOP,
+	"restart": CMD.RESTART,
+	"restart_file": CMD.RESTART_FILE,
+	"config": CMD.CONFIG,
+	"data_imu": CMD.DATA_IMU,
+}
+
 def print_config(config):
 	config_str = dump_config(config)
 	print(config_str)
 
-def interactive_cmd(my_client, my_cmd):
-	"""interactive command parser
+def run_client_interactive(my_client):
+	while True:
+		unknown = False
 
-	Show hints to help input specific parameters.
-	
-	Args:
-		my_cmd (CMD): a predefined command
-	"""
-	if my_cmd not in CMD.__members__.values():
-		print("Unknown command!")
-		return
+		try:
+			data = input('>> ').strip()
+		except (EOFError, KeyboardInterrupt):
+			return
 
-	try:
-		if my_cmd == CMD.CLOSE:
-			my_client.send_cmd(my_cmd)
-		elif my_cmd in (CMD.DATA, CMD.RAW):
-			my_client.send_cmd(my_cmd)
-			frame_idx = my_client.recv_frame()[1]
-			print(f"frame_idx: {frame_idx}")
-		elif my_cmd in (CMD.REC_DATA, CMD.REC_RAW):
-			print(f"recording filename:")
-			my_filename = input("|> ").strip()
-			my_client.send_cmd(my_cmd, my_filename)
-			ret, recv_filename = my_client.recv_string()
-			if ret == 0:
-				if my_cmd == CMD.REC_DATA:
-					data_mode = "processed"
+		if not data:
+			unknown = True
+		elif "quit".startswith(data) or data == "exit":
+			return
+		elif data in interactive_commands:
+			my_cmd = interactive_commands[data]
+		else:
+			try:
+				my_cmd = int(data)
+				if my_cmd not in CMD.__members__.values():
+					unknown = True
+			except:
+				unknown = True
+
+		if unknown:
+			print("Unknown command!")
+			continue
+
+		try:
+			if my_cmd == CMD.CLOSE:
+				my_client.send_cmd(my_cmd)
+			elif my_cmd in (CMD.DATA, CMD.RAW):
+				my_client.send_cmd(my_cmd)
+				frame_idx = my_client.recv_frame()[1]
+				print(f"frame_idx: {frame_idx}")
+			elif my_cmd in (CMD.REC_DATA, CMD.REC_RAW):
+				print(f"recording filename:")
+				my_filename = input("|> ").strip()
+				my_client.send_cmd(my_cmd, my_filename)
+				ret, recv_filename = my_client.recv_string()
+				if ret == 0:
+					if my_cmd == CMD.REC_DATA:
+						data_mode = "processed"
+					else:
+						data_mode = "raw"
+					print(f"recording {data_mode} data to file: {recv_filename}")
 				else:
-					data_mode = "raw"
-				print(f"recording {data_mode} data to file: {recv_filename}")
-			else:
-				print(f"fail to write to file: {recv_filename}")
-		elif my_cmd == CMD.REC_STOP:
-			my_client.send_cmd(my_cmd)
-			ret, recv_str = my_client.recv_string()
-			if ret == 0:
-				print("stop recording")
-			else:
-				print("fail to stop recording!")
-		elif my_cmd == CMD.RESTART:
-			print("RESTART server")
-			print("client-side config filename:")
-			config_filename = input("|> ").strip()
-			if config_filename != "":
-				with open(config_filename, 'r', encoding='utf-8') as f:
-					config_str = f.read()
-			else:
-				config_str = ""
-			my_client.send_cmd(my_cmd, config_str)
-			ret, config = my_client.recv_config()
-			print("Received config:")
-			print_config(config)
-			if ret == 0:
-				print("server restarting...")
-			else:
-				print("server failted to restart")
-		elif my_cmd == CMD.RESTART_FILE:
-			print("RESTART server")
-			print("server-side config filename:")
-			config_filename = input("|> ").strip()
-			if config_filename == "":
-				print("must input filename!!!")
-			else:
-				my_client.send_cmd(my_cmd, config_filename)
+					print(f"fail to write to file: {recv_filename}")
+			elif my_cmd == CMD.REC_STOP:
+				my_client.send_cmd(my_cmd)
+				ret, recv_str = my_client.recv_string()
+				if ret == 0:
+					print("stop recording")
+				else:
+					print("fail to stop recording!")
+			elif my_cmd == CMD.RESTART:
+				print("RESTART server")
+				print("client-side config filename:")
+				config_filename = input("|> ").strip()
+				if config_filename != "":
+					with open(config_filename, 'r', encoding='utf-8') as f:
+						config_str = f.read()
+				else:
+					config_str = ""
+				my_client.send_cmd(my_cmd, config_str)
 				ret, config = my_client.recv_config()
 				print("Received config:")
 				print_config(config)
@@ -94,49 +107,39 @@ def interactive_cmd(my_client, my_cmd):
 					print("server restarting...")
 				else:
 					print("server failted to restart")
-		elif my_cmd == CMD.CONFIG:
-			my_client.send_cmd(my_cmd)
-			ret, config = my_client.recv_config()
-			print("Received config:")
-			print_config(config)
-		elif my_cmd == CMD.REC_BREAK:
-			my_client.send_cmd(my_cmd)
-			ret, recv_str = my_client.recv_string()
-			if ret == 0:
-				print("successfully break")
-			else:
-				print("fail to break!")
-		elif my_cmd == CMD.DATA_IMU:
-			my_client.send_cmd(my_cmd)
-			data_imu, frame_idx = my_client.recv_imu()
-			print(f"IMU data: {data_imu}")
-			print(f"frame_idx: {frame_idx}")
+			elif my_cmd == CMD.RESTART_FILE:
+				print("RESTART server")
+				print("server-side config filename:")
+				config_filename = input("|> ").strip()
+				if config_filename == "":
+					print("must input filename!!!")
+				else:
+					my_client.send_cmd(my_cmd, config_filename)
+					ret, config = my_client.recv_config()
+					print("Received config:")
+					print_config(config)
+					if ret == 0:
+						print("server restarting...")
+					else:
+						print("server failted to restart")
+			elif my_cmd == CMD.CONFIG:
+				my_client.send_cmd(my_cmd)
+				ret, config = my_client.recv_config()
+				print("Received config:")
+				print_config(config)
+			elif my_cmd == CMD.DATA_IMU:
+				my_client.send_cmd(my_cmd)
+				data_imu, frame_idx = my_client.recv_imu()
+				print(f"IMU data: {data_imu}")
+				print(f"frame_idx: {frame_idx}")
 
-	except (FileNotFoundError, ConnectionResetError):
-		print("server off-line")
-	except ConnectionRefusedError:
-		print("server refused connection")
-	except timeout:
-		print("server no response")
+		except (FileNotFoundError, ConnectionResetError):
+			print("server off-line")
+		except ConnectionRefusedError:
+			print("server refused connection")
+		except timeout:
+			print("server no response")
 
-def run_client_interactive(my_client):
-	while True:
-		try:
-			data = input('>> ').strip()
-			if data and "quit".startswith(data) or data == "exit":
-				return
-		except (EOFError, KeyboardInterrupt):
-			return
-
-		try:
-			data = data.strip().split()
-			if not data:
-				raise Exception
-			my_cmd = int(data[0])
-		except:
-			continue
-
-		interactive_cmd(my_client, my_cmd)
 
 def prepare_config(args):
 	## load config and combine commandline arguments
