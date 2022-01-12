@@ -32,11 +32,31 @@ interactive_commands = {
 	"data_imu": CMD.DATA_IMU,
 }
 
+help_msg = {
+	"close": "close server",
+	"data": "get a data frame",
+	"raw": "get a raw data frame",
+	"rec_data": "send signal to record data",
+	"rec_raw": "send signal to record raw data",
+	"rec_stop": "stop recording",
+	"restart": "restart server, optional arg: configuration filename (relative to client path)",
+	"restart_file": "restart server with configuration filename (relative to server path)",
+	"config": "get server configuration",
+	"data_imu": "get an IMU data frame",
+}
+
 def print_config(config):
 	config_str = dump_config(config)
 	print(config_str)
 
+def print_help():
+	print("Usage: ")
+	for key, value in interactive_commands.items():
+		print(f"  {key} / {value}:  {help_msg[key]}")
+	print("Type 'help' to get this message.")
+
 def run_client_interactive(my_client):
+	print_help()
 	while True:
 		unknown = False
 
@@ -49,6 +69,9 @@ def run_client_interactive(my_client):
 			unknown = True
 		elif "quit".startswith(data) or data == "exit":
 			return
+		elif data == "help":
+			print_help()
+			continue
 		elif data in interactive_commands:
 			my_cmd = interactive_commands[data]
 		else:
