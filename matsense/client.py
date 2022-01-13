@@ -189,8 +189,8 @@ def prepare_config(args):
 		config['visual']['zlim'] = args.zlim
 	if config['visual']['fps'] is None or hasattr(args, 'fps'+DEST_SUFFIX):
 		config['visual']['fps'] = args.fps
-	if config['visual']['pyqtgraph'] is None or hasattr(args, 'matplot'+DEST_SUFFIX):
-		config['visual']['pyqtgraph'] = not args.matplot
+	if config['visual']['pyqtgraph'] is None or hasattr(args, 'pyqtgraph'+DEST_SUFFIX):
+		config['visual']['pyqtgraph'] = args.pyqtgraph
 	if config['visual']['scatter'] is None or hasattr(args, 'scatter'+DEST_SUFFIX):
 		config['visual']['scatter'] = args.scatter
 	if config['visual']['show_value'] is None or hasattr(args, 'show_value'+DEST_SUFFIX):
@@ -221,7 +221,8 @@ def main():
 	parser.add_argument('-i', '--interactive', dest='interactive', action=make_action('store_true'), default=False, help="interactive mode")
 	parser.add_argument('-z', '--zlim', dest='zlim', action=make_action('store'), default=ZLIM, type=float, help="z-axis limit")
 	parser.add_argument('-f', dest='fps', action=make_action('store'), default=FPS, type=int, help="frames per second")
-	parser.add_argument('-m', '--matplot', dest='matplot', action=make_action('store_true'), default=False, help="use mathplotlib to plot")
+	parser.add_argument('--pyqtgraph', dest='pyqtgraph', action=make_action('store_true'), default=False, help="use pyqtgraph to plot")
+	# parser.add_argument('-m', '--matplot', dest='matplot', action=make_action('store_true'), default=False, help="use mathplotlib to plot")
 	parser.add_argument('--config', dest='config', action=make_action('store'), default=None, help="specify configuration file")
 
 	parser.add_argument('--scatter', dest='scatter', action=make_action('store_true'), default=False, help="show scatter plot")
