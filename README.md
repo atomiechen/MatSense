@@ -4,7 +4,7 @@
 
 A toolkit that supports both real-time and off-line matrix sensor data processing and 3D visualization. 
 
-![schematic](https://raw.githubusercontent.com/atomiechen/MatSense/dev/img/schematic.drawio.svg)W
+![schematic](https://raw.githubusercontent.com/atomiechen/MatSense/dev/img/schematic.drawio.svg)
 
 A typical real-time data flow would be in a client-server manner:
 
@@ -14,7 +14,7 @@ A typical real-time data flow would be in a client-server manner:
 
 Data can also be recorded to and processed from files. 
 
-<img src="https://raw.githubusercontent.com/atomiechen/MatSense/dev/img/player.png" alt="schematic" style="zoom:40%;" />
+<img src="https://raw.githubusercontent.com/atomiechen/MatSense/dev/img/player.png" alt="schematic" width="450" />
 
 3D visualization tools are provided to play real-time stream or recorded data.
 
@@ -45,7 +45,11 @@ pip install MatSense[pyqtgraph]
 
 3 handy tools are provided. Pass `-h` to get detailed information.
 
-- `matserver` / `python -m matsense.server`: receive data from serial port, process and serve; or process data from file(s) and output to file; or provide other helpful functions.
+- `matserver` / `python -m matsense.server`
+  - functions:
+    - receive data from serial port, process and serve
+    - process data from file(s) and output to file
+    - other helpful functions
   - supported processing methods:
     - voltage-pressure conversion (optional for pressure data)
     - spatial filter (in-frame denoising): none, ideal, butterworth, gaussian
@@ -59,7 +63,15 @@ pip install MatSense[pyqtgraph]
 
 ### Configuration
 
-`matserver` and `matclient` can be totally configured by a YAML configuration file. 
+`matserver` and `matclient` can be totally configured by a YAML configuration file:
+
+```sh
+## server console
+matserver --config <your_config.yaml>
+
+## client console
+matclient --config <your_config.yaml>
+```
 
 Priority: commandline arguments > config file > program defaults.
 
@@ -236,7 +248,7 @@ The underlying server-client communication protocol is：
 | CONFIG       | get server config                     | 7                  | 1byte        | status+config_string | 1byte+string   |
 | DATA_IMU     | get IMU data                          | 9                  | 1byte        | IMU_frame+index      | 6double+1int   |
 
-- `status`: 1byte, 0 for success and 255 for failure
+- `status` (1 byte): 0 for success and 255 for failure
 
 
 
