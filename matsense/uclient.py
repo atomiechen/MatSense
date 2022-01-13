@@ -4,7 +4,8 @@ Communicate with server via UNIX domain datagram socket.
 """
 
 from socket import (
-	socket, AF_INET, SOCK_DGRAM, gethostname, gethostbyname
+	socket, AF_INET, SOCK_DGRAM, gethostname, gethostbyname,
+	SOL_SOCKET, SO_SNDBUF
 )
 try:
 	from socket import AF_UNIX
@@ -19,7 +20,7 @@ from struct import calcsize, pack, unpack, unpack_from
 from typing import Iterable
 import time
 
-from .tools import check_shape
+from .tools import check_shape, parse_config
 from .cmd import CMD
 
 
@@ -63,7 +64,7 @@ class Uclient:
 
 	N = 16
 	TIMEOUT = 0.1
-	BUF_SIZE = 4096
+	BUF_SIZE = 8192
 
 	def __init__(self, 
 				client_addr=None, 
@@ -161,6 +162,7 @@ class Uclient:
 					break
 		self.binded = True
 		self.my_socket.settimeout(self.TIMEOUT)
+		self.my_socket.setsockopt(SOL_SOCKET, SO_SNDBUF, self.BUF_SIZE)
 
 		if not self.server_addr:
 			if self.UDP:
@@ -250,33 +252,10 @@ class Uclient:
 			label = ""
 		return self.data[0], label
 
-	def recv_paras(self):
-		"""receive process parameters from server
-		
-		Returns:
-			list: variable-length list containing:
-
-			**ret** (*bytes*): 1 byte of return value, 0 for success and
-			255 for failure
-
-			**i** (*int*): initiating frame number
-
-			**w** (*int*): calibration window size
-
-			**f** (*int*): filter index
-			
-			and other parameters corresponding to the filter.
-		"""		
-		paras = unpack_from("=B3i", self.data)
-		start = calcsize("=B3i")
-		my_filter = paras[-1]
-		if my_filter == 1:  # exponential smoothing
-			paras += unpack_from("=2d", self.data, start)
-		elif my_filter == 2:  # moving average
-			paras += unpack_from("=i", self.data, start)
-		elif my_filter == 3:  # sinc low-pass
-			paras += unpack_from("=id", self.data, start)
-		return paras
+	def recv_config(self):
+		ret, config_str = self.recv_string()
+		config = parse_config(config_str)
+		return ret, config
 
 	def recv_imu(self):
 		result = unpack_from("=6di", self.data)

@@ -13,6 +13,7 @@ from os import unlink
 
 from .flag import FLAG
 from ..cmd import CMD
+from ..tools import dump_config, load_config, parse_config, combine_config
 
 
 class Userver:
@@ -35,7 +36,7 @@ class Userver:
 
 	TOTAL = 16 * 16
 	TIMEOUT = 0.1
-	BUF_SIZE = 2048
+	BUF_SIZE = 8192
 	REC_ID = 0
 
 	def __init__(self, data_out, data_raw, data_imu, idx_out, server_addr=None, **kwargs):
@@ -55,7 +56,8 @@ class Userver:
 
 		self.init_socket()
 
-	def config(self, *, total=None, udp=None, timeout=None, pipe_conn=None):
+	def config(self, *, total=None, udp=None, timeout=None, 
+		pipe_conn=None, config_copy=None):
 		if total is not None:
 			self.TOTAL = total
 		if udp is not None:
@@ -64,6 +66,8 @@ class Userver:
 			self.TIMEOUT = timeout
 		if pipe_conn is not None:
 			self.pipe_conn = pipe_conn
+		if config_copy is not None:
+			self.config_copy = config_copy
 
 	def init_socket(self):
 		if not support_unix_socket:
@@ -77,7 +81,7 @@ class Userver:
 			self.my_socket = socket(AF_UNIX, SOCK_DGRAM)
 
 		self.my_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-		self.my_socket.setsockopt(SOL_SOCKET, SO_SNDBUF, self.frame_size*2)
+		self.my_socket.setsockopt(SOL_SOCKET, SO_SNDBUF, max(self.frame_size*2, self.BUF_SIZE))
 		self.my_socket.settimeout(self.TIMEOUT)
 
 		if not self.server_addr:
@@ -109,48 +113,6 @@ class Userver:
 	def __exit__(self, type, value, traceback):
 		self.exit()
 
-	def proc_cmd(self):
-		if self.data[0] == CMD.CLOSE:
-			reply = pack("=B", 0)
-			self.my_socket.sendto(reply, self.client_addr)
-			self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
-			return CMD.CLOSE
-		elif self.data[0] == CMD.DATA:
-			reply = pack(self.frame_format, *(self.data_out), self.idx_out.value)
-			self.my_socket.sendto(reply, self.client_addr)
-		elif self.data[0] == CMD.RAW:
-			reply = pack(self.frame_format, *(self.data_raw), self.idx_out.value)
-			self.my_socket.sendto(reply, self.client_addr)
-		elif self.data[0] in (CMD.REC_DATA, CMD.REC_RAW):
-			if self.data[0] == CMD.REC_DATA:  ## processed data
-				self.pipe_conn.send((FLAG.FLAG_REC_DATA, str(self.data[1:], encoding = "utf-8")))
-			else:  ## raw data
-				self.pipe_conn.send((FLAG.FLAG_REC_RAW, str(self.data[1:], encoding = "utf-8")))
-			msg = self.pipe_conn.recv()
-			flag = msg[0]
-			if flag == FLAG.FLAG_REC_RET_SUCCESS:
-				reply = pack("=B", 0) + msg[1].encode('utf-8')
-			else:
-				reply = pack("=B", 255)
-			self.my_socket.sendto(reply, self.client_addr)
-		elif self.data[0] == CMD.REC_STOP:
-			reply = pack("=B", 0)
-			self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
-			self.my_socket.sendto(reply, self.client_addr)
-		elif self.data[0] == CMD.RESTART:
-			## TODO
-			pass
-		elif self.data[0] == CMD.PARAS:
-			## TODO
-			pass
-		elif self.data[0] == CMD.REC_BREAK:
-			reply = pack("=B", 0)
-			self.my_socket.sendto(reply, self.client_addr)
-			self.pipe_conn.send((FLAG.FLAG_REC_BREAK,))
-		elif self.data[0] == CMD.DATA_IMU:
-			reply = pack("=6di", *(self.data_imu), self.idx_out.value)
-			self.my_socket.sendto(reply, self.client_addr)
-
 	def print_service(self):
 		if self.UDP:
 			protocol_str = 'UDP'
@@ -166,17 +128,95 @@ class Userver:
 			## check signals from the other process
 			if self.pipe_conn is not None:
 				if self.pipe_conn.poll():
-					flag = self.pipe_conn.recv()
+					msg = self.pipe_conn.recv()
+					flag = msg[0]
 					if flag == FLAG.FLAG_STOP:
 						break
 
 			## try to receive requests from client(s)
 			try:
 				self.data, self.client_addr = self.my_socket.recvfrom(self.BUF_SIZE)
-				ret = self.proc_cmd()
-				if ret == CMD.CLOSE:
+
+				if self.data[0] == CMD.CLOSE:
+					reply = pack("=B", 0)
+					self.my_socket.sendto(reply, self.client_addr)
+					self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
 					self.pipe_conn.send((FLAG.FLAG_STOP,))
 					break
+				elif self.data[0] == CMD.DATA:
+					reply = pack(self.frame_format, *(self.data_out), self.idx_out.value)
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] == CMD.RAW:
+					reply = pack(self.frame_format, *(self.data_raw), self.idx_out.value)
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] in (CMD.REC_DATA, CMD.REC_RAW):
+					if self.data[0] == CMD.REC_DATA:  ## processed data
+						self.pipe_conn.send((FLAG.FLAG_REC_DATA, str(self.data[1:], encoding = "utf-8")))
+					else:  ## raw data
+						self.pipe_conn.send((FLAG.FLAG_REC_RAW, str(self.data[1:], encoding = "utf-8")))
+					msg = self.pipe_conn.recv()
+					flag = msg[0]
+					if flag == FLAG.FLAG_REC_RET_SUCCESS:
+						reply = pack("=B", 0) + msg[1].encode('utf-8')
+					else:
+						reply = pack("=B", 255)
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] == CMD.REC_STOP:
+					reply = pack("=B", 0)
+					self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] == CMD.RESTART:
+					success = False
+					config_new = self.config_copy
+					try:
+						content = str(self.data[1:], encoding='utf-8')
+						if content != "":
+							config_new = parse_config(content)
+							config_new = combine_config(self.config_copy, config_new)
+						else:
+							config_new = self.config_copy
+						reply = pack("=B", 0) + dump_config(config_new).encode('utf-8')
+						success = True
+					except:
+						reply = pack("=B", 255) + dump_config(self.config_copy).encode('utf-8')
+						success = False
+
+					self.my_socket.sendto(reply, self.client_addr)
+
+					if success:
+						self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
+						self.pipe_conn.send((FLAG.FLAG_RESTART,config_new))
+						break
+				elif self.data[0] == CMD.RESTART_FILE:
+					success = False
+					config_new = self.config_copy
+					try:
+						filename = str(self.data[1:], encoding='utf-8')
+						if filename != "":
+							config_new = load_config(filename)
+							config_new = combine_config(self.config_copy, config_new)
+							reply = pack("=B", 0) + dump_config(config_new).encode('utf-8')
+							success = True
+						else:
+							reply = pack("=B", 255) + dump_config(self.config_copy).encode('utf-8')
+							success = False
+					except:
+						reply = pack("=B", 255) + dump_config(self.config_copy).encode('utf-8')
+						success = False
+
+					self.my_socket.sendto(reply, self.client_addr)
+
+					if success:
+						self.pipe_conn.send((FLAG.FLAG_REC_STOP,))
+						self.pipe_conn.send((FLAG.FLAG_RESTART,config_new))
+						break
+				elif self.data[0] == CMD.CONFIG:
+					reply = pack("=B", 0) + dump_config(self.config_copy).encode('utf-8')
+					self.my_socket.sendto(reply, self.client_addr)
+				elif self.data[0] == CMD.DATA_IMU:
+					reply = pack("=6di", *(self.data_imu), self.idx_out.value)
+					self.my_socket.sendto(reply, self.client_addr)
+
 			except timeout:
 				pass
 			except (FileNotFoundError, ConnectionResetError):

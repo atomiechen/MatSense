@@ -138,7 +138,7 @@ class DataSetterFile:
 		self.fin = None
 
 	def open_next_file(self):
-		self.fin = open(self.filenames[self.file_idx], 'r')
+		self.fin = open(self.filenames[self.file_idx], 'r', encoding='utf-8')
 		self.file_idx += 1
 
 	def __call__(self, data_tmp, *args, **kwargs):

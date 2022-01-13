@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 
-from matsense.filemanager import parse_line, write_line
+from matsense.filemanager import parse_line, write_line, clear_file
 from matsense.serverkit import Proc
 from matsense.process import Processor
 from matsense.tools import check_shape
@@ -22,7 +22,8 @@ def main():
 	parser.add_argument('filename', action='store')
 	parser.add_argument('-n', dest='n', action='store', default=[N], type=int, nargs='+', help="specify sensor shape")
 	parser.add_argument('-f', dest='fps', action='store', default=FPS, type=int, help="frames per second")
-	parser.add_argument('-m', '--matplot', dest='matplot', action='store_true', default=False, help="use mathplotlib to plot")
+	parser.add_argument('--pyqtgraph', dest='pyqtgraph', action='store_true', default=False, help="use pyqtgraph to plot")
+	# parser.add_argument('-m', '--matplot', dest='matplot', action='store_true', default=False, help="use mathplotlib to plot")
 	parser.add_argument('-z', '--zlim', dest='zlim', action='store', default=ZLIM, type=float, help="z-axis limit")
 	parser.add_argument('-o', dest='output', action='store', default=None, help="output processed data to file")
 	parser.add_argument('--interp', dest='interp', action='store', default=[INTERP], type=int, nargs='+', help="interpolated side size")
@@ -49,10 +50,9 @@ def main():
 
 		print(f"writing to file: {args.output}")
 		## clear file content
-		with open(args.output, 'w') as fout:
-			pass
+		clear_file(args.output)
 		cnt = 0
-		with open(filename, 'r') as fin:
+		with open(filename, 'r', encoding='utf-8') as fin:
 			for line in fin:
 				data_parse, frame_idx, date_time = parse_line(line, args.n[0]*args.n[1], ',')
 				data_out = my_processor.transform(data_parse, reshape=True)
@@ -64,7 +64,7 @@ def main():
 	else:
 		print("Data visualization mode")
 		content = ([], [])
-		with open(filename, 'r') as fin:
+		with open(filename, 'r', encoding='utf-8') as fin:
 			for line in fin:
 				data_parse, frame_idx, date_time = parse_line(line, args.n[0]*args.n[1], ',')
 				if args.convert:
@@ -73,10 +73,10 @@ def main():
 				content[0].append(np.array(data_reshape))
 				content[1].append(f"frame idx: {frame_idx}  {date_time}")
 
-		if args.matplot:
-			from matsense.visual.player_matplot import Player3DMatplot as Player
-		else:
+		if args.pyqtgraph:
 			from matsense.visual.player_pyqtgraph import Player3DPyqtgraph as Player
+		else:
+			from matsense.visual.player_matplot import Player3DMatplot as Player
 		my_player = Player(zlim=args.zlim, widgets=True, N=args.n)
 		my_player.run_interactive(dataset=content[0], infoset=content[1], fps=args.fps)
 

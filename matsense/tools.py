@@ -28,6 +28,11 @@ def parse_ip_port(content):
 	return (ip, port)
 
 
+def dump_ip_port(ip_port):
+	ip, port = ip_port
+	return str(ip)+":"+str(port)
+
+
 def check_shape(n):
 	try:
 		n[1]
@@ -47,18 +52,28 @@ def parse_mask(string_in):
 	mask = np.array(mask, dtype=int)
 	return mask
 
+def dump_mask(mask_array):
+	lines = []
+	for row in mask_array:
+		str_list = [str(item) for item in row]
+		lines.append(" ".join(str_list))
+	return "\n".join(lines)
 
-## recursion
-def check_config(config):
-	def recurse(dict_default, dict_target):
-		for key in dict_default:
-			if key in dict_target:
-				if isinstance(dict_default[key], dict):
-					recurse(dict_default[key], dict_target[key])
-			else:
+## recursion, fill dict_target according to dict_default
+def __recurse(dict_default, dict_target):
+	for key in dict_default:
+		if key in dict_target:
+			if dict_target[key] is None:
 				dict_target[key] = copy.deepcopy(dict_default[key])
+			elif isinstance(dict_default[key], dict):
+				__recurse(dict_default[key], dict_target[key])
+		else:
+			dict_target[key] = copy.deepcopy(dict_default[key])
+
+
+def check_config(config):
 	## recurse to fill empty fields
-	recurse(BLANK, config)
+	__recurse(BLANK, config)
 	## some transformation for certain fields
 	if config['sensor']['shape'] is not None:
 		config['sensor']['shape'] = check_shape(config['sensor']['shape'])
@@ -77,20 +92,43 @@ def check_config(config):
 		# ## dangerous to use 'eval'
 		# config['process']['V0'] = eval(config['process']['V0'])
 
-	## some modifications
-	if config['process']['interp'] is None:
-		config['process']['interp'] = copy.deepcopy(config['sensor']['shape'])
+
+def parse_config(content):
+	config = yaml.safe_load(content)
+	check_config(config)
+	return config
 
 
 def load_config(filename):
-	with open(filename) as fin:
+	with open(filename, 'r', encoding='utf-8') as fin:
 		config = yaml.safe_load(fin)
 	check_config(config)
 	return config
 
 
+def dump_config(config):
+	config_copy = copy.deepcopy(config)
+
+	## some transformation for certain fields
+	if config_copy['sensor']['mask'] is not None:
+		config_copy['sensor']['mask'] = dump_mask(config_copy['sensor']['mask'])
+	if config_copy['connection']['server_address'] is not None:
+		config_copy['connection']['server_address'] = dump_ip_port(config_copy['connection']['server_address'])
+	if config_copy['connection']['client_address'] is not None:
+		config_copy['connection']['client_address'] = dump_ip_port(config_copy['connection']['client_address'])
+
+	return yaml.safe_dump(config_copy)
+
+
 def blank_config():
 	return copy.deepcopy(BLANK)
+
+
+def combine_config(configA, configB):
+	config = copy.deepcopy(configA)
+	__recurse(configB, config)
+	check_config(config)
+	return config
 
 
 def print_sensor(config, tab=''):

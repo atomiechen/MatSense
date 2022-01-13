@@ -27,7 +27,7 @@ setuptools.setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version='0.2.1',  # Required
+    version='0.3.0',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -158,6 +158,7 @@ setuptools.setup(
         "pyserial>=3.5",
         "PyYAML>=5.4.1",
         "pyparsing>=2.4.7",
+        "matplotlib>=3.3",
     ],
 
     # List additional groups of dependencies here (e.g. development
@@ -168,10 +169,15 @@ setuptools.setup(
     #
     # Similar to `install_requires` above, these must be valid existing
     # projects.
-    # extras_require={  # Optional
-    #     'dev': ['check-manifest'],
-    #     'test': ['coverage'],
-    # },
+    extras_require={  # Optional
+        'pyqtgraph': [
+            "pyqtgraph==0.11.*",
+            "PyOpenGL~=3.1.5",
+            "PyQt5==5.12.* ; python_version == '3.7'",
+            "PyQt5==5.15.* ; python_version == '3.8'",
+            "PyQt6==6.0.* ; python_version == '3.9'",
+        ],
+    },
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.

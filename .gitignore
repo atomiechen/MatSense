@@ -4,3 +4,6 @@ dist
 *.egg-info
 # Python binary cache files
 __pycache__
+
+.vscode
+tmp*

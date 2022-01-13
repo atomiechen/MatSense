@@ -12,6 +12,17 @@ server_mode:
   ## enumerate all serial ports
   enumerate: ~
 
+  ## (suppress serial) simulated data source without actual serial connection
+  ## debug mode: true, false
+  debug: ~
+
+  ## (suppress serial) use file as data source or not: true, false
+  use_file: ~
+  ## input filename(s), filename or a list of filenames
+  in_filenames: ~
+  ## output filename, default filename is used when not provided
+  out_filename: ~
+
 client_mode:
   ## make client present raw data
   raw: ~
