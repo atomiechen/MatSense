@@ -4,7 +4,7 @@
 
 A toolkit that supports both real-time and off-line matrix sensor data processing and 3D visualization. 
 
-![schematic](https://raw.githubusercontent.com/atomiechen/MatSense/dev/img/schematic.drawio.svg)
+![schematic](https://raw.githubusercontent.com/atomiechen/MatSense/main/img/schematic.drawio.svg)
 
 A typical real-time data flow would be in a client-server manner:
 
@@ -14,7 +14,7 @@ A typical real-time data flow would be in a client-server manner:
 
 Data can also be recorded to and processed from files. 
 
-<img src="https://raw.githubusercontent.com/atomiechen/MatSense/dev/img/player.png" alt="schematic" width="450" />
+<img src="https://raw.githubusercontent.com/atomiechen/MatSense/main/img/player.png" alt="schematic" width="450" />
 
 3D visualization tools are provided to play real-time stream or recorded data.
 
