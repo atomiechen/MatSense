@@ -202,15 +202,18 @@ def prepare_config(args):
 		config['server_mode']['enumerate'] = args.enumerate
 	if config['server_mode']['debug'] is None or hasattr(args, 'debug'+DEST_SUFFIX):
 		config['server_mode']['debug'] = args.debug
-	if args.filenames:
-		config['server_mode']['use_file'] = True
-		config['server_mode']['in_filenames'] = args.filenames
 	if config['server_mode']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
 		config['server_mode']['out_filename'] = args.output
 	if config['serial']['imu'] is None or hasattr(args, 'imu'+DEST_SUFFIX):
 		config['serial']['imu'] = args.imu
 	if config['process']['intermediate'] is None or hasattr(args, 'intermediate'+DEST_SUFFIX):
 		config['process']['intermediate'] = args.intermediate
+
+	## some modifications
+	if args.filenames:
+		config['server_mode']['use_file'] = True
+		config['server_mode']['in_filenames'] = args.filenames
+
 	check_config(config)
 	return config
 
@@ -308,6 +311,7 @@ def main():
 	parser.add_argument('-v', '--visualize', dest='visualize', action=make_action('store_true'), default=False, help="enable visualization")
 	parser.add_argument('-z', '--zlim', dest='zlim', action=make_action('store'), default=ZLIM, type=float, help="z-axis limit")
 	parser.add_argument('-f', dest='fps', action=make_action('store'), default=FPS, type=int, help="frames per second")
+	parser.add_argument('--scatter', dest='scatter', action=make_action('store_true'), default=False, help="show scatter plot")
 	parser.add_argument('--pyqtgraph', dest='pyqtgraph', action=make_action('store_true'), default=False, help="use pyqtgraph to plot")
 	# parser.add_argument('-m', '--matplot', dest='matplot', action=make_action('store_true'), default=False, help="use matplotlib to plot")
 	parser.add_argument('--config', dest='config', action=make_action('store'), default=None, help="specify configuration file")
@@ -318,7 +322,6 @@ def main():
 
 	parser.add_argument('-i', '--imu', dest='imu', action=make_action('store_true'), default=False, help="support IMU")
 
-	parser.add_argument('--scatter', dest='scatter', action=make_action('store_true'), default=False, help="show scatter plot")
 	parser.add_argument('--intermediate', dest='intermediate', action=make_action('store'), default=INTERMEDIATE, type=int, help="specify intermediate result")
 
 	args = parser.parse_args()
