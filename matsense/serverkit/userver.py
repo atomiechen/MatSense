@@ -128,7 +128,8 @@ class Userver:
 			## check signals from the other process
 			if self.pipe_conn is not None:
 				if self.pipe_conn.poll():
-					flag = self.pipe_conn.recv()
+					msg = self.pipe_conn.recv()
+					flag = msg[0]
 					if flag == FLAG.FLAG_STOP:
 						break
 

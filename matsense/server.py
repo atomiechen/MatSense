@@ -100,7 +100,7 @@ def task_serial(paras):
 		# print(e)
 	finally:
 		## close the other process
-		paras['pipe_server'].send((FLAG.FLAG_STOP,))
+		paras['pipe_proc'].send((FLAG.FLAG_STOP,))
 	print("Processing stopped.")
 	return ret
 
@@ -127,7 +127,7 @@ def task_server(paras):
 		# print(e)
 	finally:
 		## close the other process
-		paras['pipe_proc'].send((FLAG.FLAG_STOP,))
+		paras['pipe_server'].send((FLAG.FLAG_STOP,))
 
 def task_file(paras):
 	print(f"Processed data saved to: {paras['config']['server_mode']['out_filename']}")
