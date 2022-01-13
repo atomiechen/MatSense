@@ -199,12 +199,12 @@ def prepare_config(args):
 		config['client_mode']['raw'] = args.raw
 	if config['client_mode']['interactive'] is None or hasattr(args, 'interactive'+DEST_SUFFIX):
 		config['client_mode']['interactive'] = args.interactive
-	check_config(config)
 
 	## some modifications
 	if config['process']['interp'] is None:
 		config['process']['interp'] = copy.deepcopy(config['sensor']['shape'])
 
+	check_config(config)
 	return config
 
 

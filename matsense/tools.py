@@ -92,10 +92,6 @@ def check_config(config):
 		# ## dangerous to use 'eval'
 		# config['process']['V0'] = eval(config['process']['V0'])
 
-	## some modifications
-	if config['process']['interp'] is None:
-		config['process']['interp'] = copy.deepcopy(config['sensor']['shape'])
-
 
 def parse_config(content):
 	config = yaml.safe_load(content)
