@@ -192,8 +192,8 @@ def prepare_config(args):
 		config['visual']['pyqtgraph'] = args.pyqtgraph
 	if config['visual']['scatter'] is None or hasattr(args, 'scatter'+DEST_SUFFIX):
 		config['visual']['scatter'] = args.scatter
-	if config['server_mode']['service'] is None or hasattr(args, 'service'+DEST_SUFFIX):
-		config['server_mode']['service'] = args.service
+	if config['server_mode']['service'] is None or hasattr(args, 'noservice'+DEST_SUFFIX):
+		config['server_mode']['service'] = not args.noservice
 	if config['server_mode']['raw'] is None or hasattr(args, 'raw'+DEST_SUFFIX):
 		config['server_mode']['raw'] = args.raw
 	if config['server_mode']['visualize'] is None or hasattr(args, 'visualize'+DEST_SUFFIX):
@@ -300,7 +300,7 @@ def main():
 	parser.add_argument('-b', dest='baudrate', action=make_action('store'), default=BAUDRATE, type=int, help="specify baudrate")
 	parser.add_argument('-t', dest='timeout', action=make_action('store'), default=TIMEOUT, type=float, help="specify timeout in seconds")
 	parser.add_argument('-n', dest='n', action=make_action('store'), default=[N], type=int, nargs='+', help="specify sensor shape")
-	parser.add_argument('-s', '--service', dest='service', action=make_action('store_true'), default=False, help="run service")
+	parser.add_argument('--noservice', dest='noservice', action=make_action('store_true'), default=False, help="do not run service (only serial data receiving & processing)")
 	parser.add_argument('-a', '--address', dest='address', action=make_action('store'), help="specify server socket address")
 	parser.add_argument('-u', '--udp', dest='udp', action=make_action('store_true'), default=UDP, help="use UDP protocol")
 	parser.add_argument('-r', '--raw', dest='raw', action=make_action('store_true'), default=False, help="raw data mode")
