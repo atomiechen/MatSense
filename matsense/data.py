@@ -70,7 +70,17 @@ def main():
 	config = prepare_config(args)
 
 	filenames = config['data']['in_filenames']
+	if not filenames:
+		print("MUST provide input file(s) to continue.")
+		return
+
 	print(f"reading file(s): {filenames}")
+	my_setter = DataSetterFile(
+		config['sensor']['total'], 
+		config['data']['in_filenames'], 
+	)
+	## prepare data array
+	data_tmp = np.zeros(config['sensor']['total'], dtype=float)
 
 	if config['data_mode']['process']:
 		print("Data process mode:")
@@ -103,15 +113,9 @@ def main():
 		)
 		my_processor.print_info()
 
-		my_setter = DataSetterFile(
-			config['sensor']['total'], 
-			config['data']['in_filenames'], 
-		)
 		print(f"writing to file: {config['data']['out_filename']}")
 		## clear file content
 		clear_file(config['data']['out_filename'])
-		## prepare data array
-		data_tmp = np.zeros(config['sensor']['total'], dtype=float)
 
 		## prepare handler
 		def gen_data():
@@ -132,11 +136,7 @@ def main():
 
 	else:
 		print("Data visualization mode")
-		my_setter = DataSetterFile(
-			config['sensor']['total'], 
-			config['data']['in_filenames'], 
-		)
-		data_tmp = np.zeros(config['sensor']['total'], dtype=float)
+
 		content = ([], [])
 		for data_tmp, tags in my_setter.gen(data_tmp):
 			data_reshape = data_tmp.reshape(config['sensor']['shape'])
