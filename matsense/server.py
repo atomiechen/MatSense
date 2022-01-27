@@ -204,6 +204,8 @@ def prepare_config(args):
 		config['server_mode']['debug'] = args.debug
 	if config['server_mode']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
 		config['server_mode']['out_filename'] = args.output
+	if config['server_mode']['use_file'] is None:
+		config['server_mode']['use_file'] = False
 	if config['serial']['imu'] is None or hasattr(args, 'imu'+DEST_SUFFIX):
 		config['serial']['imu'] = args.imu
 	if config['process']['intermediate'] is None or hasattr(args, 'intermediate'+DEST_SUFFIX):
