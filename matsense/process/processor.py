@@ -15,13 +15,15 @@ class Processor:
 		self.order = 3
 		self.normalize = True  # normalize point coordinates to [0, 1]
 		self.special = False  ## special check for certain hardwares
+		self.original_shape = None  ## original shape of input frame
 		self.config(**kwargs)
 
 		self.interpolator = Interpolator(self.interp)
 		self.blobparser = BlobParser(self.interp)
 	
 	def config(self, *, blob=None, threshold=None, total=None, 
-				order=None, normalize=None, special=None):
+				order=None, normalize=None, special=None, 
+				original_shape=None):
 		if blob is not None:
 			self.blob = blob
 		if threshold is not None:
@@ -34,6 +36,8 @@ class Processor:
 			self.normalize = normalize
 		if special is not None:
 			self.special = special
+		if original_shape is not None:
+			self.original_shape = check_shape(original_shape)
 
 	def gen_wrapper(self, generator, **kwargs):
 		self.config(**kwargs)
@@ -57,9 +61,12 @@ class Processor:
 	def transform(self, data, reshape=False, **kwargs):
 		self.config(**kwargs)
 		if reshape:
-			size = np.shape(data)[0]
-			side = int(size**0.5)
-			data = np.reshape(data, (side, side))
+			if self.original_shape is None:
+				size = np.shape(data)[0]
+				side = int(size**0.5)
+				data = np.reshape(data, (side, side))
+			else:
+				data = np.reshape(data, self.original_shape)
 		data_out = self.interpolator.interpolate(data, order=self.order)
 		if self.blob:
 			data_out = self.blobparser.transform(data_out,
