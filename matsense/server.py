@@ -9,10 +9,11 @@ from multiprocessing import Pipe  # 进程间通信管道
 
 import traceback
 
-from matsense.serverkit import (
-	Proc, Userver, DataSetterSerial, DataSetterDebug, DataSetterFile,
-	FLAG, CustomException
+from matsense.serverkit import Proc, Userver, FLAG
+from matsense.datasetter import (
+	DataSetterSerial, DataSetterDebug, DataSetterFile
 )
+from matsense.exception import CustomException
 from matsense.tools import (
 	load_config, blank_config, check_config, print_sensor, 
     make_action, DEST_SUFFIX

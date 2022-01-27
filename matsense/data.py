@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime
 
 from matsense.filemanager import write_line, clear_file
-from matsense.serverkit import DataSetterFile
+from matsense.datasetter import DataSetterFile
 from matsense.process import Processor, DataHandlerPressure
 from matsense.tools import (
 	int2datetime, load_config, blank_config, check_config, make_action, DEST_SUFFIX

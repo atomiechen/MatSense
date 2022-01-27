@@ -1,11 +1,10 @@
 from enum import Enum
 import time
-from datetime import datetime
 from struct import calcsize, pack, unpack, unpack_from
 from serial import Serial
 
 from .exception import SerialTimeout, FileEnd
-from ..filemanager import parse_line
+from .filemanager import parse_line
 
 
 class DATA_PROTOCOL(Enum):

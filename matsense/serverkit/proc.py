@@ -4,7 +4,7 @@ from datetime import datetime
 
 from ..process import DataHandlerIMU, DataHandlerPressure
 from .flag import FLAG
-from .exception import SerialTimeout, FileEnd
+from ..exception import SerialTimeout, FileEnd
 from ..tools import check_shape
 from ..filemanager import write_line
 
