@@ -2,7 +2,7 @@ import numpy as np
 import time
 from datetime import datetime
 
-from .data_handler import DataHandlerIMU, DataHandlerPressure
+from ..process import DataHandlerIMU, DataHandlerPressure
 from .flag import FLAG
 from .exception import SerialTimeout, FileEnd
 from ..tools import check_shape
