@@ -77,8 +77,7 @@ def main():
 
 		my_handler = DataHandlerPressure(
 			n=config['sensor']['shape'],
-			## TODO check raw
-			raw=False,
+			raw=config['process']['raw'],
 			V0=config['process']['V0'],
 			R0_RECI=config['process']['R0_RECI'],
 			convert=config['process']['convert'],
