@@ -165,3 +165,11 @@ class DataSetterFile:
 
 		_, frame_idx, data_time = parse_line(line, self.total, ',', data_out=data_tmp)
 		return frame_idx, int(datetime.timestamp(data_time)*1000000)
+
+	def gen(self, data_tmp, *args, **kwargs):
+		while True:
+			try:
+				tags = self(data_tmp, *args, **kwargs)
+			except FileEnd:
+				break
+			yield data_tmp, tags
