@@ -19,10 +19,6 @@ server_mode:
 
   ## (suppress serial) use file as data source or not: true, false
   use_file: ~
-  ## input filename(s), filename or a list of filenames
-  in_filenames: ~
-  ## output filename, default filename is used when not provided
-  out_filename: ~
 
 ## configurations for matclient mode
 client_mode:

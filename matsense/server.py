@@ -130,10 +130,10 @@ def task_server(paras):
 		paras['pipe_server'].send((FLAG.FLAG_STOP,))
 
 def task_file(paras):
-	print(f"Processed data saved to: {paras['config']['server_mode']['out_filename']}")
+	print(f"Processed data saved to: {paras['config']['data']['out_filename']}")
 	my_setter = DataSetterFile(
 		paras['config']['sensor']['total'], 
-		paras['config']['server_mode']['in_filenames'], 
+		paras['config']['data']['in_filenames'], 
 	)
 	my_proc = Proc(
 		paras['config']['sensor']['shape'], 
@@ -156,11 +156,11 @@ def task_file(paras):
 		cali_frames=paras['config']['process']['cali_frames'],
 		cali_win_size=paras['config']['process']['cali_win_size'],
 		pipe_conn=None,
-		output_filename=paras['config']['server_mode']['out_filename'],
+		output_filename=paras['config']['data']['out_filename'],
 		copy_tags=True,
 	)
 	## clear file content
-	clear_file(paras['config']['server_mode']['out_filename'])
+	clear_file(paras['config']['data']['out_filename'])
 	my_proc.run()
 
 def prepare_config(args):
@@ -202,8 +202,8 @@ def prepare_config(args):
 		config['server_mode']['enumerate'] = args.enumerate
 	if config['server_mode']['debug'] is None or hasattr(args, 'debug'+DEST_SUFFIX):
 		config['server_mode']['debug'] = args.debug
-	if config['server_mode']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
-		config['server_mode']['out_filename'] = args.output
+	if config['data']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
+		config['data']['out_filename'] = args.output
 	if config['server_mode']['use_file'] is None:
 		config['server_mode']['use_file'] = False
 	if config['serial']['imu'] is None or hasattr(args, 'imu'+DEST_SUFFIX):
@@ -214,7 +214,7 @@ def prepare_config(args):
 	## some modifications
 	if args.filenames:
 		config['server_mode']['use_file'] = True
-		config['server_mode']['in_filenames'] = args.filenames
+		config['data']['in_filenames'] = args.filenames
 
 	check_config(config)
 	return config
