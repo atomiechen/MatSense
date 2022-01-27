@@ -69,7 +69,7 @@ def main():
 	args = parser.parse_args()
 	config = prepare_config(args)
 
-	filenames = config['data_mode']['in_filenames']
+	filenames = config['data']['in_filenames']
 	print(f"reading file(s): {filenames}")
 
 	if config['data_mode']['process']:
@@ -106,7 +106,7 @@ def main():
 
 		my_setter = DataSetterFile(
 			config['sensor']['total'], 
-			config['data_mode']['in_filenames'], 
+			config['data']['in_filenames'], 
 		)
 		print(f"writing to file: {config['data']['out_filename']}")
 		## clear file content
@@ -135,7 +135,7 @@ def main():
 		print("Data visualization mode")
 		my_setter = DataSetterFile(
 			config['sensor']['total'], 
-			config['data_mode']['in_filenames'], 
+			config['data']['in_filenames'], 
 		)
 		data_tmp = np.zeros(config['sensor']['total'], dtype=float)
 		content = ([], [])
