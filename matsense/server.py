@@ -71,7 +71,7 @@ def task_serial(paras):
 			paras['data_raw'], 
 			paras['data_imu'], 
 			paras['idx_out'],
-			raw=paras['config']['server_mode']['raw'],
+			raw=paras['config']['process']['raw'],
 			warm_up=paras['config']['process']['warm_up'],
 			V0=paras['config']['process']['V0'],
 			R0_RECI=paras['config']['process']['R0_RECI'],
@@ -194,8 +194,8 @@ def prepare_config(args):
 		config['visual']['scatter'] = args.scatter
 	if config['server_mode']['service'] is None or hasattr(args, 'noservice'+DEST_SUFFIX):
 		config['server_mode']['service'] = not args.noservice
-	if config['server_mode']['raw'] is None or hasattr(args, 'raw'+DEST_SUFFIX):
-		config['server_mode']['raw'] = args.raw
+	if config['process']['raw'] is None or hasattr(args, 'raw'+DEST_SUFFIX):
+		config['process']['raw'] = args.raw
 	if config['server_mode']['visualize'] is None or hasattr(args, 'visualize'+DEST_SUFFIX):
 		config['server_mode']['visualize'] = args.visualize
 	if config['server_mode']['enumerate'] is None or hasattr(args, 'enumerate'+DEST_SUFFIX):

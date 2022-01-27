@@ -6,8 +6,6 @@
 server_mode:
   ## enable backend service
   service: ~
-  ## make server provide raw data
-  raw: ~
   ## enable visualization or not (suppress service)
   visualize: ~
   ## enumerate all serial ports
@@ -82,6 +80,8 @@ process:
   convert: ~
 
   ### server data processing
+  ## no filtering and calibration
+  raw: ~
   ## time of warming up in seconds: 1
   warm_up: ~
   ## spatial filter: none, ideal, butterworth, gaussian
