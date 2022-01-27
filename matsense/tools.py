@@ -1,6 +1,7 @@
 import yaml
 import copy
 import pkgutil
+from datetime import datetime
 import ast
 import numpy as np
 
@@ -137,6 +138,14 @@ def print_sensor(config, tab=''):
 	print(f"{tab}Sensor mask:  {'' if config['sensor']['mask'] is not None else None}")
 	if config['sensor']['mask'] is not None:
 		print(f"{config['sensor']['mask']}")
+
+
+def int2datetime(timestamp_int):
+	return datetime.fromtimestamp(timestamp_int/1000000)
+
+
+def datetime2int(timestamp_datetime):
+	return int(datetime.timestamp(timestamp_datetime)*1000000)
 
 
 ## ref: https://stackoverflow.com/a/2371789/11854304
