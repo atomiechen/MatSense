@@ -1,7 +1,6 @@
 import os
 import glob
 import numpy as np
-from datetime import datetime
 from typing import Iterable
 
 
@@ -57,8 +56,7 @@ def parse_line(line, points=256, delim=',', data_out=None):
 	except:
 		frame_idx = -1
 	try:
-		time_stamp = int(paras[points+1]) / 1000000
-		date_time = datetime.fromtimestamp(time_stamp)
+		date_time = int(paras[points+1])
 	except:
 		date_time = None
 	return data_out, frame_idx, date_time
