@@ -10,14 +10,8 @@ from matsense.tools import (
 )
 
 N = 16
-INTERP = 16
 FPS = 194
-TH = 0.15
 ZLIM = 3
-CONVERT = False
-V0 = 255
-R0_RECI = 1  ## a constant to multiply the value
-
 OUTPUT_FILENAME_TEMPLATE = "processed_%Y%m%d%H%M%S.csv"
 OUTPUT_FILENAME = datetime.now().strftime(OUTPUT_FILENAME_TEMPLATE)
 
