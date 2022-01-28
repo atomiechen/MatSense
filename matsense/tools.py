@@ -87,6 +87,8 @@ def check_config(config):
 		config['connection']['server_address'] = parse_ip_port(config['connection']['server_address'])
 	if isinstance(config['connection']['client_address'], str):
 		config['connection']['client_address'] = parse_ip_port(config['connection']['client_address'])
+	if isinstance(config['data']['in_filenames'], str):
+		config['data']['in_filenames'] = [config['data']['in_filenames']]
 	if isinstance(config['process']['V0'], str):
 		nsp = NumericStringParser()
 		config['process']['V0'] = nsp.eval(config['process']['V0'])

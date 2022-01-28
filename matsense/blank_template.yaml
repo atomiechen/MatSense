@@ -32,7 +32,7 @@ data_mode:
 
 ## configurations for file data
 data:
-  ## input filename(s), filename or a list of filenames
+  ## input filename(s), filename or a list of filenames: [a.csv, b.csv, ...]
   in_filenames: ~
   ## output filename, default filename is used when not provided
   out_filename: ~
