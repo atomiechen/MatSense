@@ -66,6 +66,7 @@ class DataHandlerPressure(DataHandler):
 		self.data_inter = None
 
 		self.config(**kwargs)
+		self.print_proc()
 
 	def config(self, *, n, raw=None, V0=None, R0_RECI=None, convert=None, 
 		mask=None, filter_spatial=None, filter_spatial_cutoff=None, 
@@ -146,7 +147,6 @@ class DataHandlerPressure(DataHandler):
 			self.prepare_spatial()
 			self.prepare_temporal()
 			self.prepare_cali()
-		self.print_proc()
 
 	def handle(self, data, data_inter=None):
 		self.handle_raw_frame(data)
