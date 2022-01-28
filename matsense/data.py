@@ -1,4 +1,5 @@
 import argparse
+import copy
 import numpy as np
 from datetime import datetime
 
@@ -44,6 +45,8 @@ def prepare_config(args):
 	## some modifications
 	if hasattr(args, 'output'+DEST_SUFFIX):
 		config['data_mode']['process'] = True
+	if config['process']['interp'] is None:
+		config['process']['interp'] = copy.deepcopy(config['sensor']['shape'])
 
 	check_config(config)
 	return config
