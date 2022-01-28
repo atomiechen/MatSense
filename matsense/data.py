@@ -29,7 +29,7 @@ def prepare_config(args):
 		config['sensor']['shape'] = args.n
 	if config['data_mode']['process'] is None:
 		config['data_mode']['process'] = False
-	if config['data']['in_filenames'] is None:
+	if config['data']['in_filenames'] is None or len(args.filenames) > 0:
 		config['data']['in_filenames'] = args.filenames
 	if config['data']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
 		if args.output is None:
