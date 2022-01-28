@@ -32,6 +32,8 @@ def prepare_config(args):
 	if config['data']['in_filenames'] is None:
 		config['data']['in_filenames'] = args.filenames
 	if config['data']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
+		if args.output is None:
+			args.output = OUTPUT_FILENAME
 		config['data']['out_filename'] = args.output
 	if config['visual']['zlim'] is None or hasattr(args, 'zlim'+DEST_SUFFIX):
 		config['visual']['zlim'] = args.zlim
@@ -61,7 +63,7 @@ def main():
 	parser.add_argument('-f', dest='fps', action=make_action('store'), default=FPS, type=int, help="frames per second")
 	parser.add_argument('--scatter', dest='scatter', action=make_action('store_true'), default=False, help="show scatter plot")
 	parser.add_argument('--pyqtgraph', dest='pyqtgraph', action=make_action('store_true'), default=False, help="use pyqtgraph to plot")
-	parser.add_argument('-o', dest='output', action=make_action('store'), default=OUTPUT_FILENAME, help="output processed data to file")
+	parser.add_argument('-o', dest='output', nargs='?', action=make_action('store'), default=OUTPUT_FILENAME, help="output processed data to file")
 	parser.add_argument('--config', dest='config', action=make_action('store'), default=None, help="specify configuration file")
 	args = parser.parse_args()
 	config = prepare_config(args)
