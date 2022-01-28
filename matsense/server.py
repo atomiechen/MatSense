@@ -9,10 +9,11 @@ from multiprocessing import Pipe  # 进程间通信管道
 
 import traceback
 
-from matsense.serverkit import (
-	Proc, Userver, DataSetterSerial, DataSetterDebug, DataSetterFile,
-	FLAG, CustomException
+from matsense.serverkit import Proc, Userver, FLAG
+from matsense.datasetter import (
+	DataSetterSerial, DataSetterDebug, DataSetterFile
 )
+from matsense.exception import CustomException
 from matsense.tools import (
 	load_config, blank_config, check_config, print_sensor, 
     make_action, DEST_SUFFIX
@@ -71,7 +72,7 @@ def task_serial(paras):
 			paras['data_raw'], 
 			paras['data_imu'], 
 			paras['idx_out'],
-			raw=paras['config']['server_mode']['raw'],
+			raw=paras['config']['process']['raw'],
 			warm_up=paras['config']['process']['warm_up'],
 			V0=paras['config']['process']['V0'],
 			R0_RECI=paras['config']['process']['R0_RECI'],
@@ -130,10 +131,10 @@ def task_server(paras):
 		paras['pipe_server'].send((FLAG.FLAG_STOP,))
 
 def task_file(paras):
-	print(f"Processed data saved to: {paras['config']['server_mode']['out_filename']}")
+	print(f"Processed data saved to: {paras['config']['data']['out_filename']}")
 	my_setter = DataSetterFile(
 		paras['config']['sensor']['total'], 
-		paras['config']['server_mode']['in_filenames'], 
+		paras['config']['data']['in_filenames'], 
 	)
 	my_proc = Proc(
 		paras['config']['sensor']['shape'], 
@@ -156,11 +157,11 @@ def task_file(paras):
 		cali_frames=paras['config']['process']['cali_frames'],
 		cali_win_size=paras['config']['process']['cali_win_size'],
 		pipe_conn=None,
-		output_filename=paras['config']['server_mode']['out_filename'],
+		output_filename=paras['config']['data']['out_filename'],
 		copy_tags=True,
 	)
 	## clear file content
-	clear_file(paras['config']['server_mode']['out_filename'])
+	clear_file(paras['config']['data']['out_filename'])
 	my_proc.run()
 
 def prepare_config(args):
@@ -194,16 +195,18 @@ def prepare_config(args):
 		config['visual']['scatter'] = args.scatter
 	if config['server_mode']['service'] is None or hasattr(args, 'noservice'+DEST_SUFFIX):
 		config['server_mode']['service'] = not args.noservice
-	if config['server_mode']['raw'] is None or hasattr(args, 'raw'+DEST_SUFFIX):
-		config['server_mode']['raw'] = args.raw
+	if config['process']['raw'] is None or hasattr(args, 'raw'+DEST_SUFFIX):
+		config['process']['raw'] = args.raw
 	if config['server_mode']['visualize'] is None or hasattr(args, 'visualize'+DEST_SUFFIX):
 		config['server_mode']['visualize'] = args.visualize
 	if config['server_mode']['enumerate'] is None or hasattr(args, 'enumerate'+DEST_SUFFIX):
 		config['server_mode']['enumerate'] = args.enumerate
 	if config['server_mode']['debug'] is None or hasattr(args, 'debug'+DEST_SUFFIX):
 		config['server_mode']['debug'] = args.debug
-	if config['server_mode']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
-		config['server_mode']['out_filename'] = args.output
+	if config['data']['out_filename'] is None or hasattr(args, 'output'+DEST_SUFFIX):
+		config['data']['out_filename'] = args.output
+	if config['server_mode']['use_file'] is None:
+		config['server_mode']['use_file'] = False
 	if config['serial']['imu'] is None or hasattr(args, 'imu'+DEST_SUFFIX):
 		config['serial']['imu'] = args.imu
 	if config['process']['intermediate'] is None or hasattr(args, 'intermediate'+DEST_SUFFIX):
@@ -212,7 +215,7 @@ def prepare_config(args):
 	## some modifications
 	if args.filenames:
 		config['server_mode']['use_file'] = True
-		config['server_mode']['in_filenames'] = args.filenames
+		config['data']['in_filenames'] = args.filenames
 
 	check_config(config)
 	return config

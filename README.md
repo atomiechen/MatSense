@@ -59,34 +59,35 @@ pip install MatSense[pyqtgraph]
   - supported processing methods:
     - interpolation
     - blob parsing
-- `matdata` / `python -m matsense.data`: visualize file data, or process data
+- `matdata` / `python -m matsense.data`: visualize file data, or process off-line data
 
 ### Configuration
 
-`matserver` and `matclient` can be totally configured by a YAML configuration file:
+All 3 tools can be totally configured by a YAML configuration file:
 
 ```sh
 ## server console
-matserver --config <your_config.yaml>
+matserver --config your_config.yaml
 
 ## client console
-matclient --config <your_config.yaml>
+matclient --config your_config.yaml
+
+## off-line data processing
+matdata --config your_config.yaml
 ```
 
 Priority: commandline arguments > config file > program defaults.
 
-A template YAML configuration:
+A template YAML configuration (unused options can be set to `~` or removed):
 
 ```yaml
-## template sensor configuration
-
+## template configurations
 ## ~ for defaults
 
+## configurations for matserver mode
 server_mode:
   ## enable backend service
   service: ~
-  ## make server provide raw data
-  raw: ~
   ## enable visualization or not (suppress service)
   visualize: ~
   ## enumerate all serial ports
@@ -98,17 +99,27 @@ server_mode:
 
   ## (suppress serial) use file as data source or not: true, false
   use_file: ~
-  ## input filename(s), filename or a list of filenames
-  in_filenames: ~
-  ## output filename, default filename is used when not provided
-  out_filename: ~
 
+## configurations for matclient mode
 client_mode:
   ## make client present raw data
   raw: ~
   ## interactive command line mode
   interactive: ~
 
+## configurations for matdata mode
+data_mode:
+  ## process file data instead of visualization
+  process: ~
+
+## configurations for file data
+data:
+  ## input filename(s), filename or a list of filenames: [a.csv, b.csv, ...]
+  in_filenames: ~
+  ## output filename, default filename is used when not provided
+  out_filename: ~
+
+## configurations for matrix sensor
 sensor:
   ## sensor shape: [16, 16], [8, 8], [6, 24]
   shape: ~
@@ -118,6 +129,7 @@ sensor:
   ## |- for multiline without a newline in the end
   mask: ~
 
+## configurations for serial port
 serial:
   ## baudrate: 9600, 250000, 500000, 1000000
   baudrate: ~
@@ -130,7 +142,8 @@ serial:
   ## support IMU data
   imu: ~
 
-connection:  ## use defaults
+## configurations for client-server connections
+connection:
   ## use UDP or UNIX domain socket
   udp: ~
   ## udp address format: 127.0.0.1:20503
@@ -138,13 +151,19 @@ connection:  ## use defaults
   server_address: ~
   client_address: ~
 
+## configurations for data processing
 process:
+  ### voltage to the reciprocal of resistance
   ## reference voltage: 255, 255/3.6*3.3
   V0: ~
   ## constant factor: 1
   R0_RECI: ~
   ## convert voltage to resistance: true
   convert: ~
+
+  ### server data processing
+  ## no filtering and calibration
+  raw: ~
   ## time of warming up in seconds: 1
   warm_up: ~
   ## spatial filter: none, ideal, butterworth, gaussian
@@ -163,6 +182,13 @@ process:
   cali_frames: ~
   ## calibration frame window size, 0 for static and >0 for dynamic: 0, 10000
   cali_win_size: ~
+  ## intermediate result: 0, 1, 2
+    ## 0: convert voltage to reciprocal resistance
+    ## 1: convert & spatial filter
+    ## 2: convert & spatial filter & temporal filter
+  intermediate: ~
+
+  ### (optional) client data processing
   ## interpolation shape, default to sensor.shape
   interp: ~
   ## interpolation order: 3
@@ -175,11 +201,6 @@ process:
   threshold: ~
   ## special check for certain hardwares: false
   special_check: ~
-  ## intermediate result: 0, 1, 2
-    ## 0: convert voltage to reciprocal resistance
-    ## 1: convert & spatial filter
-    ## 2: convert & spatial filter & temporal filter
-  intermediate: ~
 
 pointing:
   ## value bound for checking cursor moving state: 0
@@ -191,6 +212,7 @@ pointing:
   ## smoothing
   alpha: ~
 
+## configurations for visualization
 visual:
   ## using pyqtgraph or matplotlib
   pyqtgraph: ~
@@ -204,21 +226,20 @@ visual:
   show_value: ~
 ```
 
-
-
 ### Useful modules
 
 - `matsense.uclient`
   - `Uclient`: interface to receive data from server
-
-- `matsense.serverkit`: server-related processing tools
+- `matsense.process`: data processing tools
   - `DataHandlerPressure`: process pressure data (conversion & filtering & calibration)
-- `matsense.process`: client-related processing tools
   - `BlobParser`
   - `Interpolator`
   - `PointSmoother`
   - `CursorController`
   - `PressureSelector`
+- `matsense.datasetter`: data setter, using serial port or file data
+  - `DataSetterSerial`
+  - `DataSetterFile`
 
 - `matense.tools`: configuration and other helpful tools
 - `matsense.filemanager`: file I/O tools

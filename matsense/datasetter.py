@@ -1,11 +1,10 @@
 from enum import Enum
 import time
-from datetime import datetime
 from struct import calcsize, pack, unpack, unpack_from
 from serial import Serial
 
 from .exception import SerialTimeout, FileEnd
-from ..filemanager import parse_line
+from .filemanager import parse_line
 
 
 class DATA_PROTOCOL(Enum):
@@ -164,4 +163,12 @@ class DataSetterFile:
 					self.open_next_file()
 
 		_, frame_idx, data_time = parse_line(line, self.total, ',', data_out=data_tmp)
-		return frame_idx, int(datetime.timestamp(data_time)*1000000)
+		return frame_idx, data_time
+
+	def gen(self, data_tmp, *args, **kwargs):
+		while True:
+			try:
+				tags = self(data_tmp, *args, **kwargs)
+			except FileEnd:
+				break
+			yield data_tmp, tags

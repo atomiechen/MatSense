@@ -1,6 +1,7 @@
 import yaml
 import copy
 import pkgutil
+from datetime import datetime
 import ast
 import numpy as np
 
@@ -86,6 +87,8 @@ def check_config(config):
 		config['connection']['server_address'] = parse_ip_port(config['connection']['server_address'])
 	if isinstance(config['connection']['client_address'], str):
 		config['connection']['client_address'] = parse_ip_port(config['connection']['client_address'])
+	if isinstance(config['data']['in_filenames'], str):
+		config['data']['in_filenames'] = [config['data']['in_filenames']]
 	if isinstance(config['process']['V0'], str):
 		nsp = NumericStringParser()
 		config['process']['V0'] = nsp.eval(config['process']['V0'])
@@ -137,6 +140,14 @@ def print_sensor(config, tab=''):
 	print(f"{tab}Sensor mask:  {'' if config['sensor']['mask'] is not None else None}")
 	if config['sensor']['mask'] is not None:
 		print(f"{config['sensor']['mask']}")
+
+
+def int2datetime(timestamp_int):
+	return datetime.fromtimestamp(timestamp_int/1000000)
+
+
+def datetime2int(timestamp_datetime):
+	return int(datetime.timestamp(timestamp_datetime)*1000000)
 
 
 ## ref: https://stackoverflow.com/a/2371789/11854304
