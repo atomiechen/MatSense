@@ -90,6 +90,7 @@ def main():
 			V0=config['process']['V0'],
 			R0_RECI=config['process']['R0_RECI'],
 			convert=config['process']['convert'],
+			resi_opposite=config['process']['resi_opposite'],
 			mask=config['sensor']['mask'],
 			filter_spatial=config['process']['filter_spatial'],
 			filter_spatial_cutoff=config['process']['filter_spatial_cutoff'],

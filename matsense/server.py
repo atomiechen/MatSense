@@ -77,6 +77,7 @@ def task_serial(paras):
 			V0=paras['config']['process']['V0'],
 			R0_RECI=paras['config']['process']['R0_RECI'],
 			convert=paras['config']['process']['convert'],
+			resi_opposite=paras['config']['process']['resi_opposite'],
 			mask=paras['config']['sensor']['mask'],
 			filter_spatial=paras['config']['process']['filter_spatial'],
 			filter_spatial_cutoff=paras['config']['process']['filter_spatial_cutoff'],
@@ -147,6 +148,7 @@ def task_file(paras):
 		V0=paras['config']['process']['V0'],
 		R0_RECI=paras['config']['process']['R0_RECI'],
 		convert=paras['config']['process']['convert'],
+		resi_opposite=paras['config']['process']['resi_opposite'],
 		mask=paras['config']['sensor']['mask'],
 		filter_spatial=paras['config']['process']['filter_spatial'],
 		filter_spatial_cutoff=paras['config']['process']['filter_spatial_cutoff'],
@@ -185,6 +187,8 @@ def prepare_config(args):
 		config['connection']['server_address'] = args.address
 	if config['process']['convert'] is None or hasattr(args, 'no_convert'+DEST_SUFFIX):
 		config['process']['convert'] = not args.no_convert
+	if config['process']['resi_opposite'] is None or hasattr(args, 'resi_opposite'+DEST_SUFFIX):
+		config['process']['resi_opposite'] = args.resi_opposite
 	if config['visual']['zlim'] is None or hasattr(args, 'zlim'+DEST_SUFFIX):
 		config['visual']['zlim'] = args.zlim
 	if config['visual']['fps'] is None or hasattr(args, 'fps'+DEST_SUFFIX):

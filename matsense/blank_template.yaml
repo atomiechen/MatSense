@@ -77,7 +77,8 @@ process:
   R0_RECI: ~
   ## convert voltage to resistance: true
   convert: ~
-
+  ## convert voltage to resistance's opposite number (otherwise reciprocal): true
+  resi_opposite: ~
   ### server data processing
   ## no filtering and calibration
   raw: ~

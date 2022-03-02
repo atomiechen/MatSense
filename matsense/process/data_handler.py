@@ -44,6 +44,7 @@ class DataHandlerPressure(DataHandler):
 
 	## voltage-resistance conversion
 	my_convert = True
+	my_resi_opposite = True
 	V0 = 255
 	R0_RECI = 1  ## a constant to multiply the value
 
@@ -73,7 +74,8 @@ class DataHandlerPressure(DataHandler):
 		butterworth_order=None, filter_temporal=None, 
 		filter_temporal_size=None, rw_cutoff=None, cali_frames=None, 
 		cali_win_size=None, 
-		intermediate=None,
+		intermediate=None, 
+		resi_opposite=None,
 		**kwargs):
 
 		self.n = check_shape(n)
@@ -88,6 +90,8 @@ class DataHandlerPressure(DataHandler):
 			self.R0_RECI = R0_RECI
 		if convert is not None:
 			self.my_convert = convert
+		if resi_opposite is not None:
+			self.my_resi_opposite = resi_opposite
 		if mask is not None:
 			self.mask = mask
 		if filter_spatial is not None:
@@ -128,6 +132,13 @@ class DataHandlerPressure(DataHandler):
 		np_array *= r0_reci
 
 	@staticmethod
+	def calOppo_numpy_array(np_array, v0, r0_reci):
+		np_array[np_array >= v0] = 0
+		np_array /= (v0 - np_array)
+		np_array *= r0_reci
+		np_array[np_array != 0] = -1 / np_array[np_array != 0]
+
+	@staticmethod
 	def getNextIndex(idx, size):
 		return (idx+1) if idx != (size-1) else 0
 
@@ -139,7 +150,10 @@ class DataHandlerPressure(DataHandler):
 		if self.my_convert:
 			# for i in range(self.total):
 			# 	self.data_tmp[i] = self.calReciprocalResistance(self.data_tmp[i], self.V0, self.R0_RECI)
-			self.calReci_numpy_array(self.data_tmp, self.V0, self.R0_RECI)
+			if self.my_resi_opposite:
+				self.calOppo_numpy_array(self.data_tmp, self.V0, self.R0_RECI)
+			else:
+				self.calReci_numpy_array(self.data_tmp, self.V0, self.R0_RECI)
 
 	def prepare(self, generator):
 		self.generator = generator
