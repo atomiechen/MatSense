@@ -78,6 +78,7 @@ def task_serial(paras):
 			R0_RECI=paras['config']['process']['R0_RECI'],
 			convert=paras['config']['process']['convert'],
 			resi_opposite=paras['config']['process']['resi_opposite'],
+			resi_delta=paras['config']['process']['resi_delta'],
 			mask=paras['config']['sensor']['mask'],
 			filter_spatial=paras['config']['process']['filter_spatial'],
 			filter_spatial_cutoff=paras['config']['process']['filter_spatial_cutoff'],
@@ -149,6 +150,7 @@ def task_file(paras):
 		R0_RECI=paras['config']['process']['R0_RECI'],
 		convert=paras['config']['process']['convert'],
 		resi_opposite=paras['config']['process']['resi_opposite'],
+		resi_delta=paras['config']['process']['resi_delta'],
 		mask=paras['config']['sensor']['mask'],
 		filter_spatial=paras['config']['process']['filter_spatial'],
 		filter_spatial_cutoff=paras['config']['process']['filter_spatial_cutoff'],
@@ -189,6 +191,8 @@ def prepare_config(args):
 		config['process']['convert'] = not args.no_convert
 	if config['process']['resi_opposite'] is None or hasattr(args, 'resi_opposite'+DEST_SUFFIX):
 		config['process']['resi_opposite'] = args.resi_opposite
+	if config['process']['resi_delta'] is None or hasattr(args, 'resi_delta'+DEST_SUFFIX):
+		config['process']['resi_delta'] = args.resi_delta
 	if config['visual']['zlim'] is None or hasattr(args, 'zlim'+DEST_SUFFIX):
 		config['visual']['zlim'] = args.zlim
 	if config['visual']['fps'] is None or hasattr(args, 'fps'+DEST_SUFFIX):
@@ -315,7 +319,8 @@ def main():
 	parser.add_argument('-u', '--udp', dest='udp', action=make_action('store_true'), default=UDP, help="use UDP protocol")
 	parser.add_argument('-r', '--raw', dest='raw', action=make_action('store_true'), default=False, help="raw data mode")
 	parser.add_argument('-nc', '--no_convert', dest='no_convert', action=make_action('store_true'), default=NO_CONVERT, help="do not apply voltage-resistance conversion")
-	parser.add_argument('-ro', '--resi_opposite', dest='resi_opposite', action=make_action('store_true'), default=True, help="turn voltage to the opposite of resistance")
+	parser.add_argument('-ro', '--resi_opposite', dest='resi_opposite', action=make_action('store_true'), default=False, help="turn voltage to the opposite of resistance")
+	parser.add_argument('-rd', '--resi_delta', dest='resi_delta', action=make_action('store_true'), default=True, help="turn voltage to the delta_R / R0")
 	parser.add_argument('-v', '--visualize', dest='visualize', action=make_action('store_true'), default=False, help="enable visualization")
 	parser.add_argument('-z', '--zlim', dest='zlim', action=make_action('store'), default=ZLIM, type=float, help="z-axis limit")
 	parser.add_argument('-f', dest='fps', action=make_action('store'), default=FPS, type=int, help="frames per second")
