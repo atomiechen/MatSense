@@ -1,7 +1,7 @@
 from enum import Enum
 from math import exp, hypot, pi, sin
 import numpy as np
-
+from collections import deque
 from ..tools import check_shape
 
 
@@ -218,6 +218,10 @@ class DataHandlerPressure(DataHandler):
 		self.data_zero /= frame_cnt
 		## calculate data_win
 		self.data_win[:] = self.data_zero
+        ## save data_min in last WIN_SIZE frames
+		self.data_min = deque(maxlen=self.my_WIN_SIZE)
+		self.data_min.append([(self.data_zero.copy(), self.win_frame_idx)])
+		self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
 
 	def calibrate(self):
 		if self.my_INIT_CALI_FRAMES <= 0:
@@ -230,7 +234,21 @@ class DataHandlerPressure(DataHandler):
 		## adjust window if using dynamic window
 		if self.my_WIN_SIZE > 0:
 			## update data_zero (zero position) and data_win (history data)
-			self.data_zero += (stored - self.data_win[self.win_frame_idx]) / self.my_WIN_SIZE
+
+			## use average number as data_zero
+			# self.data_zero += (stored - self.data_win[self.win_frame_idx]) / self.my_WIN_SIZE
+
+			## use min number as data_zero
+			if (self.data_min[0][1] == self.win_frame_idx):
+				self.data_min.popleft()
+			self.data_zero = self.data_min[0][0]
+			while (self.data_min[-1][0].sum() > stored.sum()):
+				self.data_min.pop()
+				if (len(self.data_min) == 0):
+					break
+			self.data_min.append((stored, self.win_frame_idx))
+
+			## store in data_win
 			self.data_win[self.win_frame_idx] = stored
 			## update frame index
 			self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
