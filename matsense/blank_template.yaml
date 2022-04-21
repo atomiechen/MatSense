@@ -102,6 +102,8 @@ process:
   cali_frames: ~
   ## calibration frame window size, 0 for static and >0 for dynamic: 0, 10000
   cali_win_size: ~
+  ## calibration threshold, max data above it maintain, others add to cali_win
+  cali_threshold: 2
   ## intermediate result: 0, 1, 2
     ## 0: convert voltage to reciprocal resistance
     ## 1: convert & spatial filter

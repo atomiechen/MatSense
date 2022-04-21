@@ -57,6 +57,8 @@ class DataHandlerPressure(DataHandler):
 	my_LP_W = 0.04
 	my_INIT_CALI_FRAMES = 200
 	my_WIN_SIZE = 0
+	my_CALI_THRESHOLD = 3
+	my_MAX_CALI_VALUE = 100
 
 	def __init__(self, **kwargs):
 		self.mask = None
@@ -77,7 +79,7 @@ class DataHandlerPressure(DataHandler):
 		filter_temporal_size=None, rw_cutoff=None, cali_frames=None, 
 		cali_win_size=None, 
 		intermediate=None, 
-		resi_opposite=None, resi_delta=None,
+		resi_opposite=None, resi_delta=None, cali_threshold=None,
 		**kwargs):
 
 		self.n = check_shape(n)
@@ -122,6 +124,8 @@ class DataHandlerPressure(DataHandler):
 			self.my_WIN_SIZE = cali_win_size
 		if intermediate is not None:
 			self.intermediate = intermediate
+		if cali_threshold is not None:
+			self.my_CALI_THRESHOLD = cali_threshold
 
 	@staticmethod
 	def calReciprocalResistance(voltage, v0, r0_reci):
@@ -219,9 +223,10 @@ class DataHandlerPressure(DataHandler):
 		## calculate data_win
 		self.data_win[:] = self.data_zero
         ## save data_min in last WIN_SIZE frames
-		self.data_min = deque(maxlen=self.my_WIN_SIZE)
-		self.data_min.append([(self.data_zero.copy(), self.win_frame_idx)])
+		# self.data_min = deque(maxlen=self.my_WIN_SIZE)
+		# self.data_min.append((self.data_zero.copy(), self.win_frame_idx))
 		self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
+		self.my_MAX_CALI_VALUE = self.data_zero + self.my_CALI_THRESHOLD
 
 	def calibrate(self):
 		if self.my_INIT_CALI_FRAMES <= 0:
@@ -239,19 +244,32 @@ class DataHandlerPressure(DataHandler):
 			# self.data_zero += (stored - self.data_win[self.win_frame_idx]) / self.my_WIN_SIZE
 
 			## use min number as data_zero
-			if (self.data_min[0][1] == self.win_frame_idx):
-				self.data_min.popleft()
-			self.data_zero = self.data_min[0][0]
-			while (self.data_min[-1][0].sum() > stored.sum()):
-				self.data_min.pop()
-				if (len(self.data_min) == 0):
-					break
-			self.data_min.append((stored, self.win_frame_idx))
+			# if (self.data_min[0][1] == self.win_frame_idx):
+			# 	self.data_min.popleft()
+			# self.data_zero = self.data_min[0][0]
+			# while (self.data_min[-1][0].sum() > stored.sum()):
+			# 	self.data_min.pop()
+			# 	if (len(self.data_min) == 0):
+			# 		break
+			# self.data_min.append((stored, self.win_frame_idx))
 
-			## store in data_win
-			self.data_win[self.win_frame_idx] = stored
-			## update frame index
-			self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
+			## use average number as data_zero, but delete the odd ones
+			add_to_data_zero = True
+			for id, stored_data in enumerate(stored):
+				data_at_one_point = stored_data - self.data_zero[id]
+				if (data_at_one_point > self.my_CALI_THRESHOLD or stored_data > self.my_MAX_CALI_VALUE[id]):
+					add_to_data_zero = False
+					break
+			if (add_to_data_zero):
+				self.data_zero += (stored - self.data_win[self.win_frame_idx]) / self.my_WIN_SIZE
+				## store in data_win except for odd ones
+				self.data_win[self.win_frame_idx] = stored
+				self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
+
+			# ## store in data_win
+			# self.data_win[self.win_frame_idx] = stored
+			# ## update frame index
+			# self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
 
 	def filter(self):
 		self.spatial_filter()
