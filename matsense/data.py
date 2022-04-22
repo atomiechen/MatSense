@@ -101,7 +101,8 @@ def main():
 			rw_cutoff=config['process']['rw_cutoff'],
 			cali_frames=config['process']['cali_frames'],
 			cali_win_size=config['process']['cali_win_size'],
-            cali_threshold=config['config']['process']['cali_threshold'],
+            cali_threshold=config['process']['cali_threshold'],
+            cali_win_buffer_size=config['process']['cali_win_buffer_size'],
 			intermediate=config['process']['intermediate'],
 		)
 		my_processor = Processor(

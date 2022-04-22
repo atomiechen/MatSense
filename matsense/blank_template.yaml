@@ -104,6 +104,8 @@ process:
   cali_win_size: ~
   ## calibration threshold, max data above it maintain, others add to cali_win
   cali_threshold: 2
+  ## calibration buffer size: 5
+  cali_win_buffer_size: 5
   ## intermediate result: 0, 1, 2
     ## 0: convert voltage to reciprocal resistance
     ## 1: convert & spatial filter

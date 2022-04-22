@@ -57,8 +57,8 @@ class DataHandlerPressure(DataHandler):
 	my_LP_W = 0.04
 	my_INIT_CALI_FRAMES = 200
 	my_WIN_SIZE = 0
+	my_WIN_BUFFER_SIZE = 5
 	my_CALI_THRESHOLD = 3
-	my_MAX_CALI_VALUE = 100
 
 	def __init__(self, **kwargs):
 		self.mask = None
@@ -77,7 +77,7 @@ class DataHandlerPressure(DataHandler):
 		mask=None, filter_spatial=None, filter_spatial_cutoff=None, 
 		butterworth_order=None, filter_temporal=None, 
 		filter_temporal_size=None, rw_cutoff=None, cali_frames=None, 
-		cali_win_size=None, 
+		cali_win_size=None, cali_win_buffer_size=None,
 		intermediate=None, 
 		resi_opposite=None, resi_delta=None, cali_threshold=None,
 		**kwargs):
@@ -126,6 +126,8 @@ class DataHandlerPressure(DataHandler):
 			self.intermediate = intermediate
 		if cali_threshold is not None:
 			self.my_CALI_THRESHOLD = cali_threshold
+		if cali_win_buffer_size is not None:
+			self.my_WIN_BUFFER_SIZE = cali_win_buffer_size
 
 	@staticmethod
 	def calReciprocalResistance(voltage, v0, r0_reci):
@@ -207,6 +209,9 @@ class DataHandlerPressure(DataHandler):
 		self.data_zero = np.zeros(self.total, dtype=float)
 		self.data_win = np.zeros((self.my_WIN_SIZE, self.total), dtype=float)
 		self.win_frame_idx = 0
+		self.data_win_buffer = deque(maxlen=self.my_WIN_BUFFER_SIZE)
+		self.win_buffer_frame_idx = 0
+		self.need_to_clean_buffer = False # if True then clean the buffer at next full time
 		## for preparing calibration
 		frame_cnt = 0
 		# ## accumulate data
@@ -222,11 +227,13 @@ class DataHandlerPressure(DataHandler):
 		self.data_zero /= frame_cnt
 		## calculate data_win
 		self.data_win[:] = self.data_zero
+		for _ in range(self.my_WIN_BUFFER_SIZE):
+			self.data_win_buffer.append(self.data_zero)
         ## save data_min in last WIN_SIZE frames
 		# self.data_min = deque(maxlen=self.my_WIN_SIZE)
 		# self.data_min.append((self.data_zero.copy(), self.win_frame_idx))
 		self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
-		self.my_MAX_CALI_VALUE = self.data_zero + self.my_CALI_THRESHOLD
+		self.win_buffer_frame_idx = self.getNextIndex(self.win_buffer_frame_idx, self.my_WIN_BUFFER_SIZE)
 
 	def calibrate(self):
 		if self.my_INIT_CALI_FRAMES <= 0:
@@ -257,14 +264,28 @@ class DataHandlerPressure(DataHandler):
 			add_to_data_zero = True
 			for id, stored_data in enumerate(stored):
 				data_at_one_point = stored_data - self.data_zero[id]
-				if (data_at_one_point > self.my_CALI_THRESHOLD or stored_data > self.my_MAX_CALI_VALUE[id]):
+				if (data_at_one_point > self.my_CALI_THRESHOLD):
+					# pressure over data_zero + threshold
 					add_to_data_zero = False
+					self.need_to_clean_buffer = True
+					if len(self.data_win_buffer) == self.my_WIN_BUFFER_SIZE:
+						self.data_win_buffer.clear()
 					break
 			if (add_to_data_zero):
-				self.data_zero += (stored - self.data_win[self.win_frame_idx]) / self.my_WIN_SIZE
-				## store in data_win except for odd ones
-				self.data_win[self.win_frame_idx] = stored
-				self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
+				if len(self.data_win_buffer) < self.my_WIN_BUFFER_SIZE:
+					self.data_win_buffer.append(stored)
+				else:
+					if self.need_to_clean_buffer:
+						self.data_win_buffer.clear()
+						self.need_to_clean_buffer = False
+						self.data_win_buffer.append(stored)
+					else:
+						cur_data = self.data_win_buffer.popleft()
+						self.data_win_buffer.append(stored)
+						## store in data_win
+						self.data_zero += (cur_data - self.data_win[self.win_frame_idx]) / self.my_WIN_SIZE
+						self.data_win[self.win_frame_idx] = cur_data
+						self.win_frame_idx = self.getNextIndex(self.win_frame_idx, self.my_WIN_SIZE)
 
 			# ## store in data_win
 			# self.data_win[self.win_frame_idx] = stored
