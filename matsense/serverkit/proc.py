@@ -151,7 +151,7 @@ class Proc:
 						ret = (1, config_new)
 						break
 					if flag in (FLAG.FLAG_REC_DATA, FLAG.FLAG_REC_RAW):
-						self.record_raw = True if flag == FLAG.FLAG_REC_RAW else True
+						self.record_raw = True if flag == FLAG.FLAG_REC_RAW else False
 						filename = msg[1]
 						if filename == "":
 							if flag == FLAG.FLAG_REC_RAW:

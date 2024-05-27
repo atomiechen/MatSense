@@ -90,6 +90,8 @@ def main():
 			V0=config['process']['V0'],
 			R0_RECI=config['process']['R0_RECI'],
 			convert=config['process']['convert'],
+			resi_opposite=config['process']['resi_opposite'],
+			resi_delta=config['process']['resi_delta'],
 			mask=config['sensor']['mask'],
 			filter_spatial=config['process']['filter_spatial'],
 			filter_spatial_cutoff=config['process']['filter_spatial_cutoff'],
@@ -99,6 +101,8 @@ def main():
 			rw_cutoff=config['process']['rw_cutoff'],
 			cali_frames=config['process']['cali_frames'],
 			cali_win_size=config['process']['cali_win_size'],
+            cali_threshold=config['process']['cali_threshold'],
+            cali_win_buffer_size=config['process']['cali_win_buffer_size'],
 			intermediate=config['process']['intermediate'],
 		)
 		my_processor = Processor(

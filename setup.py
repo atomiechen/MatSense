@@ -27,7 +27,7 @@ setuptools.setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version='0.4.0',  # Required
+    version='0.4.1',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -158,7 +158,7 @@ setuptools.setup(
         "pyserial>=3.5",
         "PyYAML>=5.4.1",
         "pyparsing>=2.4.7",
-        "matplotlib>=3.3",
+        "matplotlib>=3.3,<=3.4",
     ],
 
     # List additional groups of dependencies here (e.g. development
