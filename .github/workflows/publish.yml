@@ -1,0 +1,33 @@
+name: Publish Python 🐍 distributions 📦
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_testpypi:
+        type: boolean
+        default: false
+        description: Publish to TestPyPI
+      publish_pypi:
+        type: boolean
+        default: false
+        description: Publish to PyPI
+      publish_gh_release:
+        type: boolean
+        default: true
+        description: Publish to GitHub Release
+      release_tag:
+        type: string
+        description: Tag to package (empty for latest tag)
+        required: false
+
+jobs:
+  build-n-publish:
+    uses: atomiechen/reusable-workflows/.github/workflows/publish-python-distributions.yml@main
+    with:
+      publish_testpypi: ${{ inputs.publish_testpypi }}
+      publish_pypi: ${{ inputs.publish_pypi }}
+      publish_gh_release: ${{ inputs.publish_gh_release }}
+      release_tag: ${{ inputs.release_tag }}
+    secrets:
+      TEST_PYPI_API_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
