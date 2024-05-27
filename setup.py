@@ -158,7 +158,7 @@ setuptools.setup(
         "pyserial>=3.5",
         "PyYAML>=5.4.1",
         "pyparsing>=2.4.7",
-        "matplotlib>=3.3",
+        "matplotlib>=3.3,<=3.4",
     ],
 
     # List additional groups of dependencies here (e.g. development
