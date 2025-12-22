@@ -1,6 +1,8 @@
 # MatSense
 
 [![PyPi](https://img.shields.io/pypi/v/matsense.svg)](https://pypi.org/project/MatSense/)
+[![GitHub](https://img.shields.io/badge/github-MatSense-blue?logo=github)](https://github.com/atomiechen/MatSense)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/atomiechen/MatSense)
 
 A toolkit that supports both real-time and off-line matrix sensor data processing and 3D visualization. 
 
